@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Крутилка Номеров</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="main-screen" class="screen active">
+        <div class="header">
+            <div class="coins">
+                <span class="coin-icon">🪙</span>
+                <span id="coin-count">1000</span>
+            </div>
+            <button id="collection-btn" class="icon-btn">📚</button>
+        </div>
+
+        <div class="number-display">
+            <div id="number-plate" class="number-plate">
+                <div class="plate-content">
+                    <span id="plate-letter-1" class="plate-letter">А</span>
+                    <span id="plate-digits-1" class="plate-digits">000</span>
+                    <span id="plate-letters-2" class="plate-letters">АА</span>
+                    <span id="plate-region" class="plate-region">77</span>
+                </div>
+            </div>
+            <div id="rarity-badge" class="rarity-badge hidden">
+                <span id="rarity-text">ОБЫЧНЫЙ</span>
+            </div>
+        </div>
+
+        <div class="last-result" id="last-result">
+            <span class="label">Последний:</span>
+            <span id="last-number">—</span>
+            <span id="last-rarity" class="rarity-label">—</span>
+        </div>
+
+        <button id="spin-btn" class="spin-btn">
+            <span class="btn-text">КРУТИТЬ</span>
+            <span class="btn-cost">🪙 50</span>
+        </button>
+
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-value" id="total-spins">0</span>
+                <span class="stat-label">Прокруток</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="unique-found">0</span>
+                <span class="stat-label">Найдено</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="screen">
+        <div class="result-content">
+            <h2 id="result-title">ВЫПАЛО!</h2>
+            <div id="result-plate" class="number-plate large">
+                <div class="plate-content">
+                    <span id="result-letter-1" class="plate-letter">А</span>
+                    <span id="result-digits-1" class="plate-digits">000</span>
+                    <span id="result-letters-2" class="plate-letters">АА</span>
+                    <span id="result-region" class="plate-region">77</span>
+                </div>
+            </div>
+            <div id="result-rarity" class="rarity-badge">
+                <span id="result-rarity-text">ОБЫЧНЫЙ</span>
+            </div>
+            <div id="result-reward" class="reward">
+                +<span id="reward-amount">10</span> 🪙
+            </div>
+            <button id="close-result-btn" class="btn-primary">Продолжить</button>
+        </div>
+    </div>
+
+    <div id="collection-screen" class="screen">
+        <div class="collection-header">
+            <button id="back-btn" class="icon-btn">←</button>
+            <h2>Коллекция</h2>
+            <div class="collection-progress">
+                <span id="collection-count">0</span>/<span id="collection-total">0</span>
+            </div>
+        </div>
+        <div class="collection-filters">
+            <button class="filter-btn active" data-rarity="all">Все</button>
+            <button class="filter-btn" data-rarity="common">Обычные</button>
+            <button class="filter-btn" data-rarity="uncommon">Необычные</button>
+            <button class="filter-btn" data-rarity="rare">Редкие</button>
+            <button class="filter-btn" data-rarity="epic">Эпические</button>
+            <button class="filter-btn" data-rarity="legendary">Легендарные</button>
+        </div>
+        <div id="collection-list" class="collection-list"></div>
+    </div>
+
+    <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+
+    <script src="script.js"></script>
+</body>
+</html>
