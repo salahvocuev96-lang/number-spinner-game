@@ -75,93 +75,128 @@ body {
     margin: 40px 0;
 }
 
-/* Реалистичный российский номерной знак */
-/* Реалистичный российский номер */
+/* ===== РЕАЛИСТИЧНЫЙ НОМЕР ПО ГОСТ (как на картинке) ===== */
 .number-plate {
     background: #fff;
-    border: 2px solid #000;
-    border-radius: 6px;
-    padding: 10px 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    border: 3px solid #000;
+    border-radius: 10px;
+    padding: 8px;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
     display: inline-block;
 }
+
 .number-plate.large {
-    padding: 15px 30px;
-    transform: scale(1.1);
+    padding: 12px;
+    transform: scale(1.15);
 }
+
 .plate-content {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    font-family: 'Arial Black', sans-serif;
+    border: 2px solid #000;
+    border-radius: 6px;
+    padding: 12px 20px;
+    background: #fff;
+    font-family: 'Arial Black', 'Impact', sans-serif;
     color: #000;
-    border: 1px solid #000;
-    padding: 5px 15px;
-    border-radius: 4px;
 }
+
+/* Левая часть: буква + цифры + буквы */
 .plate-left {
     display: flex;
     align-items: center;
-    gap: 5px;
-    border-right: 2px solid #000;
-    padding-right: 15px;
-    margin-right: 15px;
+    gap: 6px;
+    padding-right: 20px;
+    border-right: 3px solid #000;
+    margin-right: 20px;
 }
-.plate-letter { font-size: 48px; font-weight: 900; }
-.plate-digits { font-size: 48px; font-weight: 900; }
-.plate-letters { font-size: 36px; font-weight: 900; }
+
+.plate-letter {
+    font-size: 58px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    line-height: 1;
+}
+
+.plate-digits {
+    font-size: 58px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    line-height: 1;
+}
+
+.plate-letters {
+    font-size: 44px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    line-height: 1;
+}
+
+/* Правая часть: буквы + регион + флаг */
 .plate-right {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 4px;
+    min-width: 60px;
 }
-.plate-region { font-size: 32px; font-weight: 900; line-height: 1; }
+
+.plate-region {
+    font-size: 40px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 2px;
+}
+
 .plate-rus-flag {
     display: flex;
     align-items: center;
     gap: 4px;
     margin-top: 2px;
 }
-.flag-icon {
-    width: 16px;
-    height: 10px;
-    background: linear-gradient(to bottom, #fff 33%, #0039a6 33%, #0039a6 66%, #d52b1e 66%);
-    border: 1px solid #000;
-}
-.flag-rus-text { font-size: 10px; font-weight: bold; font-family: Arial, sans-serif; }
-
-.plate-region {
-    font-size: 28px;
-    font-weight: 900;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-}
-
-.plate-region-code {
-    font-size: 28px;
-    font-weight: 900;
-}
-
-.plate-rus-flag {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 10px;
-    font-weight: normal;
-    font-family: Arial, sans-serif;
-}
 
 .flag-icon {
-    width: 16px;
-    height: 10px;
-    background: linear-gradient(to bottom, #fff 33%, #0039a6 33%, #0039a6 66%, #d52b1e 66%);
+    width: 18px;
+    height: 12px;
+    background: linear-gradient(to bottom,
+        #ffffff 0%, #ffffff 33.33%,
+        #0039a6 33.33%, #0039a6 66.66%,
+        #d52b1e 66.66%, #d52b1e 100%);
     border: 1px solid #000;
     display: inline-block;
+    flex-shrink: 0;
 }
 
+.flag-rus-text {
+    font-size: 10px;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    letter-spacing: 0.5px;
+    color: #000;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .plate-letter, .plate-digits { font-size: 44px; }
+    .plate-letters { font-size: 34px; }
+    .plate-region { font-size: 30px; }
+    .plate-left { padding-right: 14px; margin-right: 14px; border-right-width: 2px; }
+    .plate-content { padding: 10px 14px; }
+    .number-plate { padding: 6px; }
+}
+
+@media (max-width: 480px) {
+    .plate-letter, .plate-digits { font-size: 34px; }
+    .plate-letters { font-size: 26px; }
+    .plate-region { font-size: 24px; }
+    .plate-left { padding-right: 10px; margin-right: 10px; gap: 3px; }
+    .plate-content { padding: 8px 10px; }
+    .flag-icon { width: 14px; height: 9px; }
+    .flag-rus-text { font-size: 8px; }
+}
+
+/* ===== БЕЙДЖ РЕДКОСТИ ===== */
 .rarity-badge {
     margin-top: 20px;
     padding: 10px 25px;
@@ -176,29 +211,17 @@ body {
     display: none;
 }
 
-.rarity-badge.common {
-    background: #95a5a6;
-    color: #fff;
-}
-
-.rarity-badge.uncommon {
-    background: #27ae60;
-    color: #fff;
-}
-
+.rarity-badge.common { background: #95a5a6; color: #fff; }
+.rarity-badge.uncommon { background: #27ae60; color: #fff; }
 .rarity-badge.rare {
-    background: #3498db;
-    color: #fff;
+    background: #3498db; color: #fff;
     box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
 }
-
 .rarity-badge.epic {
-    background: #9b59b6;
-    color: #fff;
+    background: #9b59b6; color: #fff;
     box-shadow: 0 0 30px rgba(155, 89, 182, 0.7);
     animation: pulse 1s infinite;
 }
-
 .rarity-badge.legendary {
     background: linear-gradient(135deg, #f39c12, #e74c3c);
     color: #fff;
@@ -227,22 +250,17 @@ body {
     }
 }
 
+/* ===== ПОСЛЕДНИЙ РЕЗУЛЬТАТ ===== */
 .last-result {
     text-align: center;
     margin: 20px 0;
     font-size: 16px;
     opacity: 0.7;
 }
+.last-result .label { margin-right: 10px; }
+.last-result .rarity-label { margin-left: 10px; font-weight: bold; }
 
-.last-result .label {
-    margin-right: 10px;
-}
-
-.last-result .rarity-label {
-    margin-left: 10px;
-    font-weight: bold;
-}
-
+/* ===== КНОПКА КРУТИТЬ ===== */
 .spin-btn {
     width: 100%;
     max-width: 400px;
@@ -262,27 +280,19 @@ body {
     align-items: center;
     gap: 15px;
 }
-
 .spin-btn:hover:not(:disabled) {
     transform: translateY(-3px);
     box-shadow: 0 15px 40px rgba(231, 76, 60, 0.6);
 }
-
-.spin-btn:active:not(:disabled) {
-    transform: translateY(0);
-}
-
+.spin-btn:active:not(:disabled) { transform: translateY(0); }
 .spin-btn:disabled {
     background: #7f8c8d;
     cursor: not-allowed;
     box-shadow: none;
 }
+.btn-cost { font-size: 18px; opacity: 0.9; }
 
-.btn-cost {
-    font-size: 18px;
-    opacity: 0.9;
-}
-
+/* ===== СТАТИСТИКА ===== */
 .stats {
     display: flex;
     justify-content: space-around;
@@ -291,23 +301,16 @@ body {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 15px;
 }
-
-.stat {
-    text-align: center;
-}
-
+.stat { text-align: center; }
 .stat-value {
     display: block;
     font-size: 32px;
     font-weight: bold;
     color: #ffd700;
 }
+.stat-label { font-size: 14px; opacity: 0.7; }
 
-.stat-label {
-    font-size: 14px;
-    opacity: 0.7;
-}
-
+/* ===== ЭКРАН РЕЗУЛЬТАТА ===== */
 .result-content {
     display: flex;
     flex-direction: column;
@@ -316,7 +319,6 @@ body {
     min-height: 100vh;
     text-align: center;
 }
-
 .result-content h2 {
     font-size: 48px;
     margin-bottom: 30px;
@@ -350,24 +352,19 @@ body {
     transition: all 0.3s;
     animation: slideUp 0.5s ease 0.5s both;
 }
-
 .btn-primary:hover {
     transform: translateY(-3px);
     box-shadow: 0 10px 30px rgba(52, 152, 219, 0.5);
 }
 
+/* ===== КОЛЛЕКЦИЯ ===== */
 .collection-header {
     display: flex;
     align-items: center;
     gap: 15px;
     margin-bottom: 20px;
 }
-
-.collection-header h2 {
-    flex: 1;
-    text-align: center;
-}
-
+.collection-header h2 { flex: 1; text-align: center; }
 .collection-progress {
     font-size: 18px;
     font-weight: bold;
@@ -381,7 +378,6 @@ body {
     padding: 10px 0;
     margin-bottom: 20px;
 }
-
 .filter-btn {
     padding: 10px 20px;
     background: rgba(255, 255, 255, 0.1);
@@ -393,11 +389,7 @@ body {
     white-space: nowrap;
     transition: all 0.3s;
 }
-
-.filter-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
+.filter-btn:hover { background: rgba(255, 255, 255, 0.2); }
 .filter-btn.active {
     background: #3498db;
     border-color: #3498db;
@@ -409,7 +401,6 @@ body {
     gap: 15px;
     padding-bottom: 40px;
 }
-
 .collection-item {
     background: rgba(255, 255, 255, 0.05);
     border: 2px solid rgba(255, 255, 255, 0.1);
@@ -417,35 +408,28 @@ body {
     padding: 20px;
     transition: all 0.3s;
 }
-
 .collection-item:hover {
     transform: translateY(-5px);
     border-color: rgba(255, 255, 255, 0.3);
 }
-
 .collection-item.locked {
     opacity: 0.3;
     filter: grayscale(1);
 }
-
 .collection-item .number {
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 10px;
 }
-
 .collection-item .rarity {
     font-size: 14px;
     font-weight: bold;
     text-transform: uppercase;
     margin-bottom: 10px;
 }
+.collection-item .count { font-size: 12px; opacity: 0.7; }
 
-.collection-item .count {
-    font-size: 12px;
-    opacity: 0.7;
-}
-
+/* ===== КОНФЕТТИ ===== */
 .confetti-canvas {
     position: fixed;
     top: 0;
@@ -454,45 +438,4 @@ body {
     height: 100%;
     pointer-events: none;
     z-index: 1000;
-}
-
-@media (max-width: 768px) {
-    .plate-letter,
-    .plate-digits,
-    .plate-letters {
-        font-size: 36px;
-    }
-
-    .plate-region {
-        font-size: 24px;
-    }
-
-    .number-plate {
-        padding: 15px 20px;
-    }
-
-    .spin-btn {
-        font-size: 20px;
-        padding: 20px;
-    }
-
-    .result-content h2 {
-        font-size: 36px;
-    }
-}
-
-@media (max-width: 480px) {
-    .plate-letter,
-    .plate-digits,
-    .plate-letters {
-        font-size: 28px;
-    }
-
-    .plate-region {
-        font-size: 20px;
-    }
-
-    .collection-list {
-        grid-template-columns: 1fr;
-    }
 }
