@@ -351,6 +351,10 @@ async function spin() {
     saveProgress();
     updateUI();
     
+    // Разблокируем кнопку после прокрута
+    gameState.isSpinning = false;
+    updateUI();
+    
     setTimeout(() => {
         showResultScreen(finalNumber, rarity, reward);
     }, 1500);
