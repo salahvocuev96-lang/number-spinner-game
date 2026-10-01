@@ -32,7 +32,6 @@ const GAME_CONFIG = {
               '91','92','93','94','95','96','97','98','99']
 };
 
-// Цены продажи по редкости
 const SELL_PRICES = {
     common: 5,
     uncommon: 15,
@@ -286,8 +285,6 @@ function showResultScreen(number, rarity, reward) {
     showScreen('result-screen');
 }
 
-// ===== КОЛЛЕКЦИЯ С ПРОДАЖЕЙ =====
-
 function renderCollection(filter = 'all') {
     const collectionList = document.getElementById('collection-list');
     collectionList.innerHTML = '';
@@ -303,21 +300,13 @@ function renderCollection(filter = 'all') {
         const item = document.createElement('div');
         item.className = `collection-item ${found ? '' : 'locked'}`;
         
-        let html = `
-            <div class="number">${formatted}</div>
-            <div class="rarity ${rarity}">${getRarityName(rarity)}</div>
-        `;
+        let html = `<div class="number">${formatted}</div>`;
+        html += `<div class="rarity ${rarity}">${getRarityName(rarity)}</div>`;
         
         if (found) {
             const price = SELL_PRICES[rarity] || 1;
-            const isLast = found.count === 1;
-            const btnText = isLast 
-                ? `Продать (последний! +${price} 🪙)` 
-                : `Продать дубликат (+${price} 🪙)`;
-            const btnClass = isLast ? 'sell-btn sell-last' : 'sell-btn';
-            
             html += `<div class="count">Найдено: ${found.count} раз</div>`;
-            html += `<button class="${btnClass}" onclick="sellDuplicate('${formatted}')">${btnText}</button>`;
+            html += `<button class="sell-btn" onclick="sellDuplicate('${formatted}')">Продать (+${price} 🪙)</button>`;
         } else {
             html += '<div class="count">Не найдено</div>';
         }
@@ -330,44 +319,22 @@ function renderCollection(filter = 'all') {
 
 function sellDuplicate(formatted) {
     const item = gameState.collection[formatted];
-    if (!item) return;
+    if (!item || item.count <= 0) return;
     
     const rarity = item.rarity;
     const price = SELL_PRICES[rarity] || 1;
-    const isLast = item.count === 1;
     
-    // Подтверждение если последний экземпляр
-    if (isLast) {
-        if (!confirm(`Это последний экземпляр "${formatted}". Он исчезнет из коллекции. Продать за ${price} монет?`)) {
-            return;
-        }
-    }
-    
-    // Уменьшаем количество
     item.count--;
-    
-    // Если последний — удаляем из коллекции
     if (item.count <= 0) {
         delete gameState.collection[formatted];
     }
     
-    // Начисляем монеты
     gameState.coins += price;
-    
     saveProgress();
     updateUI();
     
     const activeFilter = document.querySelector('.filter-btn.active');
     renderCollection(activeFilter ? activeFilter.dataset.rarity : 'all');
-    
-    // Визуальный эффект
-    const coinEl = document.getElementById('coin-count');
-    coinEl.style.transform = 'scale(1.3)';
-    coinEl.style.color = '#ffd700';
-    setTimeout(() => {
-        coinEl.style.transform = 'scale(1)';
-        coinEl.style.color = '';
-    }, 300);
 }
 
 function generateAllPossibleNumbers() {
