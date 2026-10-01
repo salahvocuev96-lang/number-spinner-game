@@ -32,42 +32,26 @@ const GAME_CONFIG = {
               '91','92','93','94','95','96','97','98','99']
 };
 
+// Цены продажи по редкости
+const SELL_PRICES = {
+    common: 5,
+    uncommon: 15,
+    rare: 50,
+    epic: 200,
+    legendary: 1000
+};
+
 function calculateRarity(number) {
     const digitStr = number.digits.toString().padStart(3, '0');
     
-    if (digitStr === '777' && number.letters2 === 'АА' && number.region === '77') {
-        return 'legendary';
-    }
-    
-    if (digitStr[0] === digitStr[1] && digitStr[1] === digitStr[2] &&
-        number.letters2[0] === number.letters2[1]) {
-        return 'epic';
-    }
-    
-    if (digitStr[0] === digitStr[2] && digitStr[0] !== digitStr[1] &&
-        number.letters2[0] === number.letters2[1]) {
-        return 'epic';
-    }
-    
-    if (digitStr[0] === digitStr[1] && digitStr[1] === digitStr[2]) {
-        return 'rare';
-    }
-    
-    if (digitStr[0] === '0' && digitStr[1] === '0' && digitStr[2] !== '0') {
-        return 'rare';
-    }
-    
-    if ((digitStr === '123' || digitStr === '321') && number.letters2[0] === number.letters2[1]) {
-        return 'rare';
-    }
-    
-    if (digitStr[0] === digitStr[1] || digitStr[1] === digitStr[2] || digitStr[0] === digitStr[2]) {
-        return 'uncommon';
-    }
-    
-    if (number.letters2[0] === number.letters2[1]) {
-        return 'uncommon';
-    }
+    if (digitStr === '777' && number.letters2 === 'АА' && number.region === '77') return 'legendary';
+    if (digitStr[0] === digitStr[1] && digitStr[1] === digitStr[2] && number.letters2[0] === number.letters2[1]) return 'epic';
+    if (digitStr[0] === digitStr[2] && digitStr[0] !== digitStr[1] && number.letters2[0] === number.letters2[1]) return 'epic';
+    if (digitStr[0] === digitStr[1] && digitStr[1] === digitStr[2]) return 'rare';
+    if (digitStr[0] === '0' && digitStr[1] === '0' && digitStr[2] !== '0') return 'rare';
+    if ((digitStr === '123' || digitStr === '321') && number.letters2[0] === number.letters2[1]) return 'rare';
+    if (digitStr[0] === digitStr[1] || digitStr[1] === digitStr[2] || digitStr[0] === digitStr[2]) return 'uncommon';
+    if (number.letters2[0] === number.letters2[1]) return 'uncommon';
     
     return 'common';
 }
@@ -75,20 +59,15 @@ function calculateRarity(number) {
 function generateNumber() {
     const letter1 = GAME_CONFIG.ALLOWED_LETTERS[Math.floor(Math.random() * GAME_CONFIG.ALLOWED_LETTERS.length)];
     const digits = Math.floor(Math.random() * 1000);
-    const letters2 = Array.from({ length: 2 }, () => 
-        GAME_CONFIG.ALLOWED_LETTERS[Math.floor(Math.random() * GAME_CONFIG.ALLOWED_LETTERS.length)]
-    ).join('');
+    const letters2 = Array.from({ length: 2 }, () => GAME_CONFIG.ALLOWED_LETTERS[Math.floor(Math.random() * GAME_CONFIG.ALLOWED_LETTERS.length)]).join('');
     const region = GAME_CONFIG.REGIONS[Math.floor(Math.random() * GAME_CONFIG.REGIONS.length)];
-    
     return { letter1, digits, letters2, region };
 }
 
 function generateNumberByRarity(targetRarity) {
     for (let i = 0; i < 1000; i++) {
         const number = generateNumber();
-        if (calculateRarity(number) === targetRarity) {
-            return number;
-        }
+        if (calculateRarity(number) === targetRarity) return number;
     }
     return generateNumber();
 }
@@ -96,19 +75,15 @@ function generateNumberByRarity(targetRarity) {
 function getRandomRarity() {
     const roll = Math.random();
     let cumulative = 0;
-    
     for (const [rarity, chance] of Object.entries(GAME_CONFIG.RARITY_CHANCES)) {
         cumulative += chance;
-        if (roll <= cumulative) {
-            return rarity;
-        }
+        if (roll <= cumulative) return rarity;
     }
     return 'common';
 }
 
 function formatNumber(number) {
-    const digits = number.digits.toString().padStart(3, '0');
-    return `${number.letter1}${digits}${number.letters2}${number.region}`;
+    return `${number.letter1}${number.digits.toString().padStart(3, '0')}${number.letters2}${number.region}`;
 }
 
 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -117,43 +92,31 @@ const audioCtx = new AudioContext();
 function playSpinSound() {
     const oscillator = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
-    
     oscillator.connect(gainNode);
     gainNode.connect(audioCtx.destination);
-    
     oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
     oscillator.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.1);
-    
     gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-    
     oscillator.start(audioCtx.currentTime);
     oscillator.stop(audioCtx.currentTime + 0.1);
 }
 
 function playWinSound(rarity) {
     const frequencies = {
-        common: [400, 500, 600],
-        uncommon: [500, 600, 700],
-        rare: [600, 700, 800, 900],
-        epic: [700, 800, 900, 1000, 1100],
-        legendary: [800, 900, 1000, 1100, 1200, 1300]
+        common: [400, 500, 600], uncommon: [500, 600, 700], rare: [600, 700, 800, 900],
+        epic: [700, 800, 900, 1000, 1100], legendary: [800, 900, 1000, 1100, 1200, 1300]
     };
-    
     const freqs = frequencies[rarity] || frequencies.common;
-    
     freqs.forEach((freq, index) => {
         setTimeout(() => {
             const oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
-            
             oscillator.connect(gainNode);
             gainNode.connect(audioCtx.destination);
-            
             oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
             gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-            
             oscillator.start(audioCtx.currentTime);
             oscillator.stop(audioCtx.currentTime + 0.2);
         }, index * 100);
@@ -165,63 +128,39 @@ function createConfetti() {
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    
     const particles = [];
     const colors = ['#f39c12', '#e74c3c', '#9b59b6', '#3498db', '#2ecc71', '#ffd700'];
-    
     for (let i = 0; i < 100; i++) {
         particles.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height - canvas.height,
-            vx: (Math.random() - 0.5) * 4,
-            vy: Math.random() * 3 + 2,
+            x: Math.random() * canvas.width, y: Math.random() * canvas.height - canvas.height,
+            vx: (Math.random() - 0.5) * 4, vy: Math.random() * 3 + 2,
             color: colors[Math.floor(Math.random() * colors.length)],
-            size: Math.random() * 8 + 4,
-            rotation: Math.random() * 360,
-            rotationSpeed: (Math.random() - 0.5) * 10
+            size: Math.random() * 8 + 4, rotation: Math.random() * 360, rotationSpeed: (Math.random() - 0.5) * 10
         });
     }
-    
     let animationId;
     function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
         particles.forEach(p => {
-            p.x += p.vx;
-            p.y += p.vy;
-            p.rotation += p.rotationSpeed;
-            
-            ctx.save();
-            ctx.translate(p.x, p.y);
-            ctx.rotate(p.rotation * Math.PI / 180);
-            ctx.fillStyle = p.color;
-            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-            ctx.restore();
+            p.x += p.vx; p.y += p.vy; p.rotation += p.rotationSpeed;
+            ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rotation * Math.PI / 180);
+            ctx.fillStyle = p.color; ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size); ctx.restore();
         });
-        
         if (particles.some(p => p.y < canvas.height)) {
             animationId = requestAnimationFrame(animate);
         } else {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
     }
-    
     animate();
-    
-    setTimeout(() => {
-        cancelAnimationFrame(animationId);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }, 3000);
+    setTimeout(() => { cancelAnimationFrame(animationId); ctx.clearRect(0, 0, canvas.width, canvas.height); }, 3000);
 }
 
 function saveProgress() {
-    const data = {
-        coins: gameState.coins,
-        collection: gameState.collection,
-        totalSpins: gameState.totalSpins,
-        lastNumber: gameState.lastNumber
-    };
-    localStorage.setItem('numberSpinnerProgress', JSON.stringify(data));
+    localStorage.setItem('numberSpinnerProgress', JSON.stringify({
+        coins: gameState.coins, collection: gameState.collection,
+        totalSpins: gameState.totalSpins, lastNumber: gameState.lastNumber
+    }));
 }
 
 function loadProgress() {
@@ -235,22 +174,10 @@ function loadProgress() {
     }
 }
 
-const gameState = {
-    coins: GAME_CONFIG.STARTING_COINS,
-    collection: {},
-    totalSpins: 0,
-    lastNumber: null,
-    isSpinning: false
-};
+const gameState = { coins: GAME_CONFIG.STARTING_COINS, collection: {}, totalSpins: 0, lastNumber: null, isSpinning: false };
 
 function getRarityName(rarity) {
-    const names = {
-        common: 'ОБЫЧНЫЙ',
-        uncommon: 'НЕОБЫЧНЫЙ',
-        rare: 'РЕДКИЙ',
-        epic: 'ЭПИЧЕСКИЙ',
-        legendary: 'ЛЕГЕНДАРНЫЙ'
-    };
+    const names = { common: 'ОБЫЧНЫЙ', uncommon: 'НЕОБЫЧНЫЙ', rare: 'РЕДКИЙ', epic: 'ЭПИЧЕСКИЙ', legendary: 'ЛЕГЕНДАРНЫЙ' };
     return names[rarity] || rarity.toUpperCase();
 }
 
@@ -272,9 +199,7 @@ function updateUI() {
 }
 
 function showScreen(screenId) {
-    document.querySelectorAll('.screen').forEach(screen => {
-        screen.classList.remove('active');
-    });
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
 }
 
@@ -313,7 +238,6 @@ async function spin() {
         plateRegion.textContent = tempNumber.region;
         
         playSpinSound();
-        
         await new Promise(resolve => setTimeout(resolve, currentInterval));
     }
     
@@ -332,32 +256,21 @@ async function spin() {
     
     const formatted = formatNumber(finalNumber);
     if (!gameState.collection[formatted]) {
-        gameState.collection[formatted] = {
-            number: finalNumber,
-            rarity: rarity,
-            count: 0
-        };
+        gameState.collection[formatted] = { number: finalNumber, rarity: rarity, count: 0 };
     }
     gameState.collection[formatted].count++;
     
-    const reward = GAME_CONFIG.REWARDS[rarity];
-    gameState.coins += reward;
+    gameState.coins += GAME_CONFIG.REWARDS[rarity];
     
     playWinSound(rarity);
-    if (rarity === 'epic' || rarity === 'legendary') {
-        createConfetti();
-    }
+    if (rarity === 'epic' || rarity === 'legendary') createConfetti();
     
     saveProgress();
-    updateUI();
     
-    // Разблокируем кнопку после прокрута
     gameState.isSpinning = false;
     updateUI();
     
-    setTimeout(() => {
-        showResultScreen(finalNumber, rarity, reward);
-    }, 1500);
+    setTimeout(() => showResultScreen(finalNumber, rarity, GAME_CONFIG.REWARDS[rarity]), 1500);
 }
 
 function showResultScreen(number, rarity, reward) {
@@ -366,23 +279,14 @@ function showResultScreen(number, rarity, reward) {
     document.getElementById('result-letters-2').textContent = number.letters2;
     document.getElementById('result-region').textContent = number.region;
     
-    const resultRarity = document.getElementById('result-rarity');
     document.getElementById('result-rarity-text').textContent = getRarityName(rarity);
-    resultRarity.className = `rarity-badge ${rarity}`;
-    
+    document.getElementById('result-rarity').className = `rarity-badge ${rarity}`;
     document.getElementById('reward-amount').textContent = reward;
     
     showScreen('result-screen');
 }
 
-// Цены продажи дубликатов по редкости
-const SELL_PRICES = {
-    common: 5,
-    uncommon: 15,
-    rare: 50,
-    epic: 200,
-    legendary: 1000
-};
+// ===== КОЛЛЕКЦИЯ С ПРОДАЖЕЙ =====
 
 function renderCollection(filter = 'all') {
     const collectionList = document.getElementById('collection-list');
@@ -405,12 +309,15 @@ function renderCollection(filter = 'all') {
         `;
         
         if (found) {
+            const price = SELL_PRICES[rarity] || 1;
+            const isLast = found.count === 1;
+            const btnText = isLast 
+                ? `Продать (последний! +${price} 🪙)` 
+                : `Продать дубликат (+${price} 🪙)`;
+            const btnClass = isLast ? 'sell-btn sell-last' : 'sell-btn';
+            
             html += `<div class="count">Найдено: ${found.count} раз</div>`;
-            // Кнопка продажи появляется только если есть дубликат (count > 1)
-            if (found.count > 1) {
-                const price = SELL_PRICES[rarity] || 1;
-                html += `<button class="sell-btn" onclick="sellDuplicate('${formatted}')">Продать дубликат (+${price} 🪙)</button>`;
-            }
+            html += `<button class="${btnClass}" onclick="sellDuplicate('${formatted}')">${btnText}</button>`;
         } else {
             html += '<div class="count">Не найдено</div>';
         }
@@ -421,24 +328,37 @@ function renderCollection(filter = 'all') {
     document.getElementById('collection-count').textContent = Object.keys(gameState.collection).length;
 }
 
-// Функция продажи дубликата
 function sellDuplicate(formatted) {
     const item = gameState.collection[formatted];
-    if (!item || item.count <= 1) return;
+    if (!item) return;
     
     const rarity = item.rarity;
     const price = SELL_PRICES[rarity] || 1;
+    const isLast = item.count === 1;
+    
+    // Подтверждение если последний экземпляр
+    if (isLast) {
+        if (!confirm(`Это последний экземпляр "${formatted}". Он исчезнет из коллекции. Продать за ${price} монет?`)) {
+            return;
+        }
+    }
     
     // Уменьшаем количество
     item.count--;
     
+    // Если последний — удаляем из коллекции
+    if (item.count <= 0) {
+        delete gameState.collection[formatted];
+    }
+    
     // Начисляем монеты
     gameState.coins += price;
     
-    // Сохраняем и обновляем
     saveProgress();
     updateUI();
-    renderCollection(document.querySelector('.filter-btn.active').dataset.rarity);
+    
+    const activeFilter = document.querySelector('.filter-btn.active');
+    renderCollection(activeFilter ? activeFilter.dataset.rarity : 'all');
     
     // Визуальный эффект
     const coinEl = document.getElementById('coin-count');
@@ -462,30 +382,14 @@ function generateAllPossibleNumbers() {
         { letter1: 'А', digits: 121, letters2: 'ВС', region: '77' },
         { letter1: 'В', digits: 456, letters2: 'АА', region: '01' }
     ];
-    
-    for (let i = 0; i < 20; i++) {
-        numbers.push(generateNumber());
-    }
-    
+    for (let i = 0; i < 20; i++) numbers.push(generateNumber());
     return numbers;
 }
 
 document.getElementById('spin-btn').addEventListener('click', spin);
-
-document.getElementById('close-result-btn').addEventListener('click', () => {
-    showScreen('main-screen');
-    updateUI();
-});
-
-document.getElementById('collection-btn').addEventListener('click', () => {
-    renderCollection();
-    showScreen('collection-screen');
-});
-
-document.getElementById('back-btn').addEventListener('click', () => {
-    showScreen('main-screen');
-    updateUI();
-});
+document.getElementById('close-result-btn').addEventListener('click', () => { showScreen('main-screen'); updateUI(); });
+document.getElementById('collection-btn').addEventListener('click', () => { renderCollection(); showScreen('collection-screen'); });
+document.getElementById('back-btn').addEventListener('click', () => { showScreen('main-screen'); updateUI(); });
 
 document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -499,7 +403,5 @@ loadProgress();
 updateUI();
 
 document.addEventListener('click', () => {
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
 }, { once: true });
