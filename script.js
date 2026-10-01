@@ -260,16 +260,38 @@ function showResultScreen(number, rarity, reward) {
     if (rrEl) rrEl.className = 'rarity-badge ' + rarity;
     const ra = document.getElementById('reward-amount');
     if (ra) ra.textContent = reward;
+    
+    const sellBtn = document.getElementById('sell-result-btn');
+    if (sellBtn) {
+        const formatted = formatNumber(number);
+        const price = SELL_PRICES[rarity] || 1;
+        const count = gameState.collection[formatted] ? gameState.collection[formatted].count : 0;
+        sellBtn.textContent = 'Продать (+' + price + ' 🪙)';
+        sellBtn.className = 'sell-result-btn';
+        sellBtn.disabled = false;
+        sellBtn.onclick = function() {
+            if (gameState.collection[formatted] && gameState.collection[formatted].count > 0) {
+                gameState.collection[formatted].count--;
+                if (gameState.collection[formatted].count <= 0) {
+                    delete gameState.collection[formatted];
+                }
+                gameState.coins += price;
+                saveProgress();
+                updateUI();
+                sellBtn.textContent = 'Продано!';
+                sellBtn.className = 'sell-result-btn sold';
+                sellBtn.disabled = true;
+            }
+        };
+    }
+    
     showScreen('result-screen');
 }
 
-// ПРОСТАЯ ФУНКЦИЯ КОЛЛЕКЦИИ - показывает только реально выпавшие номера
 function renderCollection(filter) {
     const list = document.getElementById('collection-list');
     if (!list) return;
     list.innerHTML = '';
-    
-    // Берём все номера из коллекции
     const collectionKeys = Object.keys(gameState.collection);
     
     if (collectionKeys.length === 0) {
@@ -288,11 +310,9 @@ function renderCollection(filter) {
         const item = gameState.collection[formatted];
         const rarity = item.rarity;
         
-        // Фильтр по редкости
         if (filter && filter !== 'all' && rarity !== filter) continue;
         
         foundCount++;
-        
         const price = SELL_PRICES[rarity] || 1;
         
         const div = document.createElement('div');
