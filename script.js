@@ -9,7 +9,6 @@ const GAME_CONFIG = {
 
 const SELL_PRICES = { common: 5, uncommon: 15, rare: 50, epic: 200, legendary: 1000 };
 
-// ОДИН AudioContext на всю игру
 let audioCtx = null;
 let audioEnabled = false;
 
@@ -264,71 +263,56 @@ function showResultScreen(number, rarity, reward) {
     showScreen('result-screen');
 }
 
-function generateAllPossibleNumbers() {
-    const numbers = [
-        { letter1: 'А', digits: 777, letters2: 'АА', region: '77' },
-        { letter1: 'В', digits: 111, letters2: 'ВВ', region: '77' },
-        { letter1: 'А', digits: 777, letters2: 'ВВ', region: '77' },
-        { letter1: 'Е', digits: 121, letters2: 'КК', region: '01' },
-        { letter1: 'А', digits: 777, letters2: 'ВС', region: '77' },
-        { letter1: 'К', digits: 123, letters2: 'АА', region: '02' },
-        { letter1: 'М', digits: 7, letters2: 'ЕН', region: '77' },
-        { letter1: 'А', digits: 121, letters2: 'ВС', region: '77' },
-        { letter1: 'В', digits: 456, letters2: 'АА', region: '01' }
-    ];
-    for (let i = 0; i < 15; i++) numbers.push(generateNumber());
-    return numbers;
-}
-
+// ПРОСТАЯ ФУНКЦИЯ КОЛЛЕКЦИИ - показывает только реально выпавшие номера
 function renderCollection(filter) {
-    console.log('renderCollection вызвана, фильтр:', filter);
-    console.log('Коллекция:', gameState.collection);
     const list = document.getElementById('collection-list');
     if (!list) return;
     list.innerHTML = '';
-    const allNumbers = generateAllPossibleNumbers();
-    const totalEl = document.getElementById('collection-total');
-    if (totalEl) totalEl.textContent = allNumbers.length;
-    let filtered;
-    if (!filter || filter === 'all') {
-        filtered = allNumbers;
-    } else {
-        filtered = allNumbers.filter(function(n) { return calculateRarity(n) === filter; });
+    
+    // Берём все номера из коллекции
+    const collectionKeys = Object.keys(gameState.collection);
+    
+    if (collectionKeys.length === 0) {
+        list.innerHTML = '<div style="text-align: center; padding: 40px; opacity: 0.5;">Коллекция пуста. Крути рулетку!</div>';
+        const countEl = document.getElementById('collection-count');
+        if (countEl) countEl.textContent = '0';
+        const totalEl = document.getElementById('collection-total');
+        if (totalEl) totalEl.textContent = '0';
+        return;
     }
+    
     let foundCount = 0;
-    for (let i = 0; i < filtered.length; i++) {
-        const number = filtered[i];
-        const formatted = formatNumber(number);
-        const found = gameState.collection[formatted];
-        const rarity = calculateRarity(number);
-        const item = document.createElement('div');
-        item.className = 'collection-item' + (found ? '' : ' locked');
-        let html = '<div class="number">' + formatted + '</div>';
-        html += '<div class="rarity ' + rarity + '">' + getRarityName(rarity) + '</div>';
-        if (found) {
-            foundCount++;
-            const price = SELL_PRICES[rarity] || 1;
-            html += '<div class="count">Найдено: ' + found.count + ' раз</div>';
-            html += '<button class="sell-btn" onclick="sellDuplicate(\'' + formatted + '\')">Продать (+' + price + ' 🪙)</button>';
-            console.log('Добавлена кнопка для:', formatted);
-        } else {
-            html += '<div class="count">Не найдено</div>';
-        }
-        item.innerHTML = html;
-        list.appendChild(item);
+    
+    for (let i = 0; i < collectionKeys.length; i++) {
+        const formatted = collectionKeys[i];
+        const item = gameState.collection[formatted];
+        const rarity = item.rarity;
+        
+        // Фильтр по редкости
+        if (filter && filter !== 'all' && rarity !== filter) continue;
+        
+        foundCount++;
+        
+        const price = SELL_PRICES[rarity] || 1;
+        
+        const div = document.createElement('div');
+        div.className = 'collection-item';
+        div.innerHTML = '<div class="number">' + formatted + '</div>' +
+            '<div class="rarity ' + rarity + '">' + getRarityName(rarity) + '</div>' +
+            '<div class="count">Найдено: ' + item.count + ' раз</div>' +
+            '<button class="sell-btn" onclick="sellDuplicate(\'' + formatted + '\')">Продать (+' + price + ' 🪙)</button>';
+        list.appendChild(div);
     }
+    
     const countEl = document.getElementById('collection-count');
     if (countEl) countEl.textContent = foundCount;
-    console.log('Всего найдено:', foundCount);
+    const totalEl = document.getElementById('collection-total');
+    if (totalEl) totalEl.textContent = collectionKeys.length;
 }
 
 function sellDuplicate(formatted) {
-    console.log('sellDuplicate вызвана для:', formatted);
     const item = gameState.collection[formatted];
-    if (!item || item.count <= 0) {
-        console.log('Не удалось продать:', formatted);
-        return;
-    }
+    if (!item || item.count <= 0) return;
     const price = SELL_PRICES[item.rarity] || 1;
     item.count--;
     if (item.count <= 0) {
@@ -340,7 +324,6 @@ function sellDuplicate(formatted) {
     const activeFilter = document.querySelector('.filter-btn.active');
     const filter = activeFilter ? activeFilter.dataset.rarity : 'all';
     renderCollection(filter);
-    console.log('Продано! Монеты:', gameState.coins);
 }
 
 document.getElementById('spin-btn').addEventListener('click', spin);
@@ -351,7 +334,6 @@ document.getElementById('close-result-btn').addEventListener('click', function()
 });
 
 document.getElementById('collection-btn').addEventListener('click', function() {
-    console.log('Открыта коллекция');
     renderCollection('all');
     showScreen('collection-screen');
 });
@@ -370,11 +352,9 @@ for (let i = 0; i < filterBtns.length; i++) {
     });
 }
 
-// Инициализация аудио при первом клике
 document.addEventListener('click', function() {
     initAudio();
 }, { once: true });
 
 loadProgress();
 updateUI();
-console.log('Игра загружена. Монеты:', gameState.coins, 'Коллекция:', Object.keys(gameState.collection).length);
