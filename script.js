@@ -375,35 +375,79 @@ function showResultScreen(number, rarity, reward) {
     showScreen('result-screen');
 }
 
+// Цены продажи дубликатов по редкости
+const SELL_PRICES = {
+    common: 5,
+    uncommon: 15,
+    rare: 50,
+    epic: 200,
+    legendary: 1000
+};
+
 function renderCollection(filter = 'all') {
     const collectionList = document.getElementById('collection-list');
     collectionList.innerHTML = '';
-    
     const allNumbers = generateAllPossibleNumbers();
     document.getElementById('collection-total').textContent = allNumbers.length;
     
-    const filtered = filter === 'all' 
-        ? allNumbers 
-        : allNumbers.filter(n => calculateRarity(n) === filter);
+    const filtered = filter === 'all' ? allNumbers : allNumbers.filter(n => calculateRarity(n) === filter);
     
     filtered.forEach(number => {
         const formatted = formatNumber(number);
         const found = gameState.collection[formatted];
         const rarity = calculateRarity(number);
-        
         const item = document.createElement('div');
         item.className = `collection-item ${found ? '' : 'locked'}`;
         
-        item.innerHTML = `
+        let html = `
             <div class="number">${formatted}</div>
             <div class="rarity ${rarity}">${getRarityName(rarity)}</div>
-            ${found ? `<div class="count">Найдено: ${found.count} раз</div>` : '<div class="count">Не найдено</div>'}
         `;
         
+        if (found) {
+            html += `<div class="count">Найдено: ${found.count} раз</div>`;
+            // Кнопка продажи появляется только если есть дубликат (count > 1)
+            if (found.count > 1) {
+                const price = SELL_PRICES[rarity] || 1;
+                html += `<button class="sell-btn" onclick="sellDuplicate('${formatted}')">Продать дубликат (+${price} 🪙)</button>`;
+            }
+        } else {
+            html += '<div class="count">Не найдено</div>';
+        }
+        
+        item.innerHTML = html;
         collectionList.appendChild(item);
     });
-    
     document.getElementById('collection-count').textContent = Object.keys(gameState.collection).length;
+}
+
+// Функция продажи дубликата
+function sellDuplicate(formatted) {
+    const item = gameState.collection[formatted];
+    if (!item || item.count <= 1) return;
+    
+    const rarity = item.rarity;
+    const price = SELL_PRICES[rarity] || 1;
+    
+    // Уменьшаем количество
+    item.count--;
+    
+    // Начисляем монеты
+    gameState.coins += price;
+    
+    // Сохраняем и обновляем
+    saveProgress();
+    updateUI();
+    renderCollection(document.querySelector('.filter-btn.active').dataset.rarity);
+    
+    // Визуальный эффект
+    const coinEl = document.getElementById('coin-count');
+    coinEl.style.transform = 'scale(1.3)';
+    coinEl.style.color = '#ffd700';
+    setTimeout(() => {
+        coinEl.style.transform = 'scale(1)';
+        coinEl.style.color = '';
+    }, 300);
 }
 
 function generateAllPossibleNumbers() {
