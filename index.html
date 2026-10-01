@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+    <!-- Главный экран -->
     <div id="main-screen" class="screen active">
         <div class="header">
             <div class="coins">
@@ -18,22 +20,20 @@
 
         <div class="number-display">
             <div id="number-plate" class="number-plate">
-<div class="plate-content">
-    <div class="plate-left">
-        <span id="plate-letter-1" class="plate-letter">А</span>
-        <span id="plate-digits-1" class="plate-digits">000</span>
-    </div>
-    <div class="plate-right">
-        <span id="plate-letters-2" class="plate-letters">АА</span>
-        <div class="plate-region">
-            <span id="plate-region" class="plate-region-code">77</span>
-            <div class="plate-rus-flag">
-                <span class="flag-icon"></span>
-                <span>RUS</span>
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="plate-content">
+                    <div class="plate-main">
+                        <span id="plate-letter-1" class="plate-letter">А</span>
+                        <span id="plate-digits-1" class="plate-digits">000</span>
+                        <span id="plate-letters-2" class="plate-letters">АА</span>
+                    </div>
+                    <div class="plate-region-block">
+                        <span id="plate-region" class="plate-region-code">77</span>
+                        <div class="plate-flag">
+                            <span class="flag-icon"></span>
+                            <span class="flag-text">RUS</span>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div id="rarity-badge" class="rarity-badge hidden">
                 <span id="rarity-text">ОБЫЧНЫЙ</span>
@@ -63,26 +63,25 @@
         </div>
     </div>
 
+    <!-- Экран результата -->
     <div id="result-screen" class="screen">
         <div class="result-content">
             <h2 id="result-title">ВЫПАЛО!</h2>
             <div id="result-plate" class="number-plate large">
-<div class="plate-content">
-    <div class="plate-left">
-        <span id="plate-letter-1" class="plate-letter">А</span>
-        <span id="plate-digits-1" class="plate-digits">000</span>
-    </div>
-    <div class="plate-right">
-        <span id="plate-letters-2" class="plate-letters">АА</span>
-        <div class="plate-region">
-            <span id="plate-region" class="plate-region-code">77</span>
-            <div class="plate-rus-flag">
-                <span class="flag-icon"></span>
-                <span>RUS</span>
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="plate-content">
+                    <div class="plate-main">
+                        <span id="result-letter-1" class="plate-letter">А</span>
+                        <span id="result-digits-1" class="plate-digits">000</span>
+                        <span id="result-letters-2" class="plate-letters">АА</span>
+                    </div>
+                    <div class="plate-region-block">
+                        <span id="result-region" class="plate-region-code">77</span>
+                        <div class="plate-flag">
+                            <span class="flag-icon"></span>
+                            <span class="flag-text">RUS</span>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div id="result-rarity" class="rarity-badge">
                 <span id="result-rarity-text">ОБЫЧНЫЙ</span>
@@ -94,6 +93,7 @@
         </div>
     </div>
 
+    <!-- Экран коллекции -->
     <div id="collection-screen" class="screen">
         <div class="collection-header">
             <button id="back-btn" class="icon-btn">←</button>
@@ -113,6 +113,7 @@
         <div id="collection-list" class="collection-list"></div>
     </div>
 
+    <!-- Эффект конфетти -->
     <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
 
     <script src="script.js"></script>
