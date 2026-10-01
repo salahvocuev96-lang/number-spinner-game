@@ -362,6 +362,35 @@ body {
     box-shadow: 0 10px 30px rgba(52, 152, 219, 0.5);
 }
 
+/* Кнопка "Продать" на экране результата */
+.sell-result-btn {
+    padding: 15px 40px;
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 15px;
+    animation: slideUp 0.5s ease 0.4s both;
+}
+
+.sell-result-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(46, 204, 113, 0.5);
+}
+
+.sell-result-btn:active {
+    transform: translateY(0);
+}
+
+.sell-result-btn.sold {
+    background: #7f8c8d;
+    cursor: not-allowed;
+}
+
 .collection-header {
     display: flex;
     align-items: center;
@@ -448,7 +477,6 @@ body {
     margin-bottom: 8px;
 }
 
-/* Кнопка продажи дубликата */
 .sell-btn {
     margin-top: 10px;
     width: 100%;
