@@ -27,7 +27,7 @@ function generateNumber() {
     const digits = Math.floor(Math.random() * 1000);
     const letters2 = Array.from({length: 2}, () => GAME_CONFIG.ALLOWED_LETTERS[Math.floor(Math.random() * GAME_CONFIG.ALLOWED_LETTERS.length)]).join('');
     const region = GAME_CONFIG.REGIONS[Math.floor(Math.random() * GAME_CONFIG.REGIONS.length)];
-    return { letter1, digits, letters2, region };
+    return { letter1: letter1, digits: digits, letters2: letters2, region: region };
 }
 
 function generateNumberByRarity(targetRarity) {
@@ -41,89 +41,114 @@ function generateNumberByRarity(targetRarity) {
 function getRandomRarity() {
     const roll = Math.random();
     let cum = 0;
-    for (const [r, c] of Object.entries(GAME_CONFIG.RARITY_CHANCES)) {
-        cum += c;
-        if (roll <= cum) return r;
+    for (const key in GAME_CONFIG.RARITY_CHANCES) {
+        cum += GAME_CONFIG.RARITY_CHANCES[key];
+        if (roll <= cum) return key;
     }
     return 'common';
 }
 
 function formatNumber(n) {
-    return `${n.letter1}${n.digits.toString().padStart(3, '0')}${n.letters2}${n.region}`;
+    return n.letter1 + n.digits.toString().padStart(3, '0') + n.letters2 + n.region;
 }
-
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioContext();
 
 function playSpinSound() {
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.connect(g); g.connect(audioCtx.destination);
-    o.frequency.setValueAtTime(800, audioCtx.currentTime);
-    o.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.1);
-    g.gain.setValueAtTime(0.1, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-    o.start(audioCtx.currentTime); o.stop(audioCtx.currentTime + 0.1);
-}
-
-function playWinSound(rarity) {
-    const freqs = { common: [400,500,600], uncommon: [500,600,700], rare: [600,700,800,900], epic: [700,800,900,1000,1100], legendary: [800,900,1000,1100,1200,1300] };
-    (freqs[rarity] || freqs.common).forEach((f, i) => {
-        setTimeout(() => {
-            const o = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            o.connect(g); g.connect(audioCtx.destination);
-            o.frequency.setValueAtTime(f, audioCtx.currentTime);
-            g.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-            o.start(audioCtx.currentTime); o.stop(audioCtx.currentTime + 0.2);
-        }, i * 100);
-    });
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioContext();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.frequency.setValueAtTime(800, ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.1);
+        g.gain.setValueAtTime(0.1, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+        o.start(ctx.currentTime);
+        o.stop(ctx.currentTime + 0.1);
+    } catch(e) {}
 }
 
 function createConfetti() {
     const canvas = document.getElementById('confetti-canvas');
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     const particles = [];
     const colors = ['#f39c12','#e74c3c','#9b59b6','#3498db','#2ecc71','#ffd700'];
     for (let i = 0; i < 100; i++) {
-        particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height - canvas.height, vx: (Math.random()-0.5)*4, vy: Math.random()*3+2, color: colors[Math.floor(Math.random()*colors.length)], size: Math.random()*8+4, rotation: Math.random()*360, rotationSpeed: (Math.random()-0.5)*10 });
+        particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            vx: (Math.random() - 0.5) * 4,
+            vy: Math.random() * 3 + 2,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            size: Math.random() * 8 + 4,
+            rotation: Math.random() * 360,
+            rotationSpeed: (Math.random() - 0.5) * 10
+        });
     }
     let id;
     function animate() {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        particles.forEach(p => {
-            p.x += p.vx; p.y += p.vy; p.rotation += p.rotationSpeed;
-            ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rotation*Math.PI/180);
-            ctx.fillStyle = p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size); ctx.restore();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(function(p) {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.rotation += p.rotationSpeed;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation * Math.PI / 180);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            ctx.restore();
         });
-        if (particles.some(p => p.y < canvas.height)) id = requestAnimationFrame(animate);
-        else ctx.clearRect(0,0,canvas.width,canvas.height);
+        if (particles.some(function(p) { return p.y < canvas.height; })) {
+            id = requestAnimationFrame(animate);
+        } else {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
     }
     animate();
-    setTimeout(() => { cancelAnimationFrame(id); ctx.clearRect(0,0,canvas.width,canvas.height); }, 3000);
+    setTimeout(function() {
+        cancelAnimationFrame(id);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }, 3000);
 }
 
 function saveProgress() {
-    localStorage.setItem('numberSpinnerProgress', JSON.stringify({ coins: gameState.coins, collection: gameState.collection, totalSpins: gameState.totalSpins, lastNumber: gameState.lastNumber }));
+    localStorage.setItem('numberSpinnerProgress', JSON.stringify({
+        coins: gameState.coins,
+        collection: gameState.collection,
+        totalSpins: gameState.totalSpins,
+        lastNumber: gameState.lastNumber
+    }));
 }
 
 function loadProgress() {
     const saved = localStorage.getItem('numberSpinnerProgress');
     if (saved) {
-        const d = JSON.parse(saved);
-        gameState.coins = d.coins || GAME_CONFIG.STARTING_COINS;
-        gameState.collection = d.collection || {};
-        gameState.totalSpins = d.totalSpins || 0;
-        gameState.lastNumber = d.lastNumber || null;
+        try {
+            const d = JSON.parse(saved);
+            gameState.coins = d.coins || GAME_CONFIG.STARTING_COINS;
+            gameState.collection = d.collection || {};
+            gameState.totalSpins = d.totalSpins || 0;
+            gameState.lastNumber = d.lastNumber || null;
+        } catch(e) {}
     }
 }
 
-const gameState = { coins: GAME_CONFIG.STARTING_COINS, collection: {}, totalSpins: 0, lastNumber: null, isSpinning: false };
+const gameState = {
+    coins: GAME_CONFIG.STARTING_COINS,
+    collection: {},
+    totalSpins: 0,
+    lastNumber: null,
+    isSpinning: false
+};
 
 function getRarityName(r) {
-    return { common: 'ОБЫЧНЫЙ', uncommon: 'НЕОБЫЧНЫЙ', rare: 'РЕДКИЙ', epic: 'ЭПИЧЕСКИЙ', legendary: 'ЛЕГЕНДАРНЫЙ' }[r] || r.toUpperCase();
+    const names = { common: 'ОБЫЧНЫЙ', uncommon: 'НЕОБЫЧНЫЙ', rare: 'РЕДКИЙ', epic: 'ЭПИЧЕСКИЙ', legendary: 'ЛЕГЕНДАРНЫЙ' };
+    return names[r] || r.toUpperCase();
 }
 
 function updateUI() {
@@ -134,13 +159,13 @@ function updateUI() {
         document.getElementById('last-number').textContent = formatNumber(gameState.lastNumber);
         const r = calculateRarity(gameState.lastNumber);
         document.getElementById('last-rarity').textContent = getRarityName(r);
-        document.getElementById('last-rarity').className = `rarity-label ${r}`;
+        document.getElementById('last-rarity').className = 'rarity-label ' + r;
     }
     document.getElementById('spin-btn').disabled = gameState.isSpinning || gameState.coins < GAME_CONFIG.SPIN_COST;
 }
 
 function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.getElementById(id).classList.add('active');
 }
 
@@ -151,7 +176,8 @@ async function spin() {
     updateUI();
     const targetRarity = getRandomRarity();
     const finalNumber = generateNumberByRarity(targetRarity);
-    const duration = 3000, startTime = Date.now(), updateInterval = 50;
+    const duration = 3000;
+    const startTime = Date.now();
     const pL1 = document.getElementById('plate-letter-1');
     const pD1 = document.getElementById('plate-digits-1');
     const pL2 = document.getElementById('plate-letters-2');
@@ -167,4 +193,131 @@ async function spin() {
         pL2.textContent = tempNumber.letters2;
         pR.textContent = tempNumber.region;
         playSpinSound();
-        await new Promise(r => setTimeout(r, updateInterval + progress * 20
+        await new Promise(function(resolve) { setTimeout(resolve, 50 + progress * 200); });
+    }
+    pL1.textContent = finalNumber.letter1;
+    pD1.textContent = finalNumber.digits.toString().padStart(3, '0');
+    pL2.textContent = finalNumber.letters2;
+    pR.textContent = finalNumber.region;
+    const rarity = calculateRarity(finalNumber);
+    rText.textContent = getRarityName(rarity);
+    rBadge.className = 'rarity-badge ' + rarity;
+    rBadge.classList.remove('hidden');
+    gameState.totalSpins++;
+    gameState.lastNumber = finalNumber;
+    const formatted = formatNumber(finalNumber);
+    if (!gameState.collection[formatted]) {
+        gameState.collection[formatted] = { number: finalNumber, rarity: rarity, count: 0 };
+    }
+    gameState.collection[formatted].count++;
+    gameState.coins += GAME_CONFIG.REWARDS[rarity];
+    if (rarity === 'epic' || rarity === 'legendary') createConfetti();
+    saveProgress();
+    gameState.isSpinning = false;
+    updateUI();
+    setTimeout(function() { showResultScreen(finalNumber, rarity, GAME_CONFIG.REWARDS[rarity]); }, 1500);
+}
+
+function showResultScreen(number, rarity, reward) {
+    document.getElementById('result-letter-1').textContent = number.letter1;
+    document.getElementById('result-digits-1').textContent = number.digits.toString().padStart(3, '0');
+    document.getElementById('result-letters-2').textContent = number.letters2;
+    document.getElementById('result-region').textContent = number.region;
+    document.getElementById('result-rarity-text').textContent = getRarityName(rarity);
+    document.getElementById('result-rarity').className = 'rarity-badge ' + rarity;
+    document.getElementById('reward-amount').textContent = reward;
+    showScreen('result-screen');
+}
+
+function generateAllPossibleNumbers() {
+    const numbers = [
+        { letter1: 'А', digits: 777, letters2: 'АА', region: '77' },
+        { letter1: 'В', digits: 111, letters2: 'ВВ', region: '77' },
+        { letter1: 'А', digits: 777, letters2: 'ВВ', region: '77' },
+        { letter1: 'Е', digits: 121, letters2: 'КК', region: '01' },
+        { letter1: 'А', digits: 777, letters2: 'ВС', region: '77' },
+        { letter1: 'К', digits: 123, letters2: 'АА', region: '02' },
+        { letter1: 'М', digits: 7, letters2: 'ЕН', region: '77' },
+        { letter1: 'А', digits: 121, letters2: 'ВС', region: '77' },
+        { letter1: 'В', digits: 456, letters2: 'АА', region: '01' }
+    ];
+    for (let i = 0; i < 20; i++) numbers.push(generateNumber());
+    return numbers;
+}
+
+function renderCollection(filter) {
+    if (!filter) filter = 'all';
+    const list = document.getElementById('collection-list');
+    list.innerHTML = '';
+    const allNumbers = generateAllPossibleNumbers();
+    document.getElementById('collection-total').textContent = allNumbers.length;
+    let filtered;
+    if (filter === 'all') {
+        filtered = allNumbers;
+    } else {
+        filtered = allNumbers.filter(function(n) { return calculateRarity(n) === filter; });
+    }
+    filtered.forEach(function(number) {
+        const formatted = formatNumber(number);
+        const found = gameState.collection[formatted];
+        const rarity = calculateRarity(number);
+        const item = document.createElement('div');
+        item.className = 'collection-item' + (found ? '' : ' locked');
+        let html = '<div class="number">' + formatted + '</div>';
+        html += '<div class="rarity ' + rarity + '">' + getRarityName(rarity) + '</div>';
+        if (found) {
+            const price = SELL_PRICES[rarity] || 1;
+            html += '<div class="count">Найдено: ' + found.count + ' раз</div>';
+            html += '<button class="sell-btn" onclick="sellDuplicate(\'' + formatted + '\')">Продать (+' + price + ' 🪙)</button>';
+        } else {
+            html += '<div class="count">Не найдено</div>';
+        }
+        item.innerHTML = html;
+        list.appendChild(item);
+    });
+    document.getElementById('collection-count').textContent = Object.keys(gameState.collection).length;
+}
+
+function sellDuplicate(formatted) {
+    const item = gameState.collection[formatted];
+    if (!item || item.count <= 0) return;
+    const price = SELL_PRICES[item.rarity] || 1;
+    item.count--;
+    if (item.count <= 0) {
+        delete gameState.collection[formatted];
+    }
+    gameState.coins += price;
+    saveProgress();
+    updateUI();
+    const activeFilter = document.querySelector('.filter-btn.active');
+    const filter = activeFilter ? activeFilter.dataset.rarity : 'all';
+    renderCollection(filter);
+}
+
+document.getElementById('spin-btn').addEventListener('click', spin);
+
+document.getElementById('close-result-btn').addEventListener('click', function() {
+    showScreen('main-screen');
+    updateUI();
+});
+
+document.getElementById('collection-btn').addEventListener('click', function() {
+    renderCollection('all');
+    showScreen('collection-screen');
+});
+
+document.getElementById('back-btn').addEventListener('click', function() {
+    showScreen('main-screen');
+    updateUI();
+});
+
+document.querySelectorAll('.filter-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+        document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+        e.target.classList.add('active');
+        renderCollection(e.target.dataset.rarity);
+    });
+});
+
+loadProgress();
+updateUI();
