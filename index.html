@@ -20,14 +20,15 @@
 
         <div class="number-display">
             <div id="number-plate" class="number-plate">
-                <div class="plate-content">
-                    <div class="plate-main">
+                <div class="plate-inner">
+                    <div class="plate-left">
                         <span id="plate-letter-1" class="plate-letter">А</span>
                         <span id="plate-digits-1" class="plate-digits">000</span>
                         <span id="plate-letters-2" class="plate-letters">АА</span>
                     </div>
-                    <div class="plate-region-block">
-                        <span id="plate-region" class="plate-region-code">77</span>
+                    <div class="plate-divider"></div>
+                    <div class="plate-right">
+                        <span id="plate-region" class="plate-region">77</span>
                         <div class="plate-flag">
                             <span class="flag-icon"></span>
                             <span class="flag-text">RUS</span>
@@ -68,14 +69,15 @@
         <div class="result-content">
             <h2 id="result-title">ВЫПАЛО!</h2>
             <div id="result-plate" class="number-plate large">
-                <div class="plate-content">
-                    <div class="plate-main">
+                <div class="plate-inner">
+                    <div class="plate-left">
                         <span id="result-letter-1" class="plate-letter">А</span>
                         <span id="result-digits-1" class="plate-digits">000</span>
                         <span id="result-letters-2" class="plate-letters">АА</span>
                     </div>
-                    <div class="plate-region-block">
-                        <span id="result-region" class="plate-region-code">77</span>
+                    <div class="plate-divider"></div>
+                    <div class="plate-right">
+                        <span id="result-region" class="plate-region">77</span>
                         <div class="plate-flag">
                             <span class="flag-icon"></span>
                             <span class="flag-text">RUS</span>
@@ -113,9 +115,7 @@
         <div id="collection-list" class="collection-list"></div>
     </div>
 
-    <!-- Эффект конфетти -->
     <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
-
     <script src="script.js"></script>
 </body>
 </html>
