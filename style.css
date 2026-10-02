@@ -135,10 +135,12 @@ body {
 }
 
 .plate-region {
-    font-size: 48px;
+    font-size: 42px;
     font-weight: 900;
     line-height: 1;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
+    min-width: 60px;
+    text-align: center;
 }
 
 .plate-flag {
@@ -169,7 +171,7 @@ body {
 
 @media (max-width: 768px) {
     .plate-letter, .plate-digits, .plate-letters { font-size: 48px; }
-    .plate-region { font-size: 36px; }
+    .plate-region { font-size: 30px; min-width: 50px; }
     .plate-divider { height: 55px; margin: 0 14px; }
     .plate-inner { padding: 12px 18px; }
     .plate-left { padding-right: 14px; }
@@ -177,7 +179,7 @@ body {
 
 @media (max-width: 480px) {
     .plate-letter, .plate-digits, .plate-letters { font-size: 36px; }
-    .plate-region { font-size: 28px; }
+    .plate-region { font-size: 22px; min-width: 45px; }
     .plate-divider { height: 42px; margin: 0 10px; width: 2px; }
     .plate-inner { padding: 10px 12px; }
     .plate-left { padding-right: 10px; gap: 4px; }
