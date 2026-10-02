@@ -9,37 +9,6 @@ const GAME_CONFIG = {
 
 const SELL_PRICES = { common: 5, uncommon: 15, rare: 50, epic: 200, legendary: 1000 };
 
-let audioCtx = null;
-let audioEnabled = false;
-
-function initAudio() {
-    if (audioCtx) return;
-    try {
-        const Ctx = window.AudioContext || window.webkitAudioContext;
-        if (Ctx) {
-            audioCtx = new Ctx();
-            audioEnabled = true;
-        }
-    } catch(e) { audioEnabled = false; }
-}
-
-function playSpinSound() {
-    if (!audioEnabled || !audioCtx) return;
-    try {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const o = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        o.connect(g);
-        g.connect(audioCtx.destination);
-        o.frequency.setValueAtTime(600, audioCtx.currentTime);
-        o.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.03);
-        g.gain.setValueAtTime(0.03, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
-        o.start(audioCtx.currentTime);
-        o.stop(audioCtx.currentTime + 0.03);
-    } catch(e) {}
-}
-
 function calculateRarity(number) {
     const d = number.digits.toString().padStart(3, '0');
     if (d === '777' && number.letters2 === 'АА' && number.region === '77') return 'legendary';
@@ -306,7 +275,7 @@ function showResultScreen(number, rarity, reward) {
     if (sellBtn) {
         const formatted = formatNumber(number);
         const price = SELL_PRICES[rarity] || 1;
-        sellBtn.textContent = 'Продать (+' + price + ' 🪙)';
+        sellBtn.textContent = 'Продать (+' + price + ' )';
         sellBtn.className = 'sell-result-btn';
         sellBtn.disabled = false;
         sellBtn.onclick = function() {
@@ -363,8 +332,8 @@ function renderCollection(filter) {
         div.innerHTML = '<div class="number">' + formatted + '</div>' +
             '<div class="rarity ' + rarity + '">' + getRarityName(rarity) + '</div>' +
             '<div class="count">Найдено: ' + item.count + ' раз</div>' +
-            '<button class="sell-btn" onclick="sellDuplicate(\'' + formatted + '\')">Продать (+' + price + ' )</button>' +
-            '<button class="garage-btn" style="margin-top:5px; width:100%; padding:8px 12px; background:linear-gradient(135deg, #3498db, #2980b9); border:none; border-radius:8px; color:#fff; font-size:13px; font-weight:bold; cursor:pointer;" onclick="addToGarage(\'' + formatted + '\')">В гараж </button>';
+            '<button class="sell-btn" onclick="sellDuplicate(\'' + formatted + '\')">Продать (+' + price + ' 🪙)</button>' +
+            '<button class="garage-btn" style="margin-top:5px; width:100%; padding:8px 12px; background:linear-gradient(135deg, #3498db, #2980b9); border:none; border-radius:8px; color:#fff; font-size:13px; font-weight:bold; cursor:pointer;" onclick="addToGarage(\'' + formatted + '\')">В гараж 🚗</button>';
         list.appendChild(div);
     }
     
@@ -388,6 +357,7 @@ function sellDuplicate(formatted) {
     }
     
     gameState.coins += price;
+    playSellSound();
     saveProgress();
     updateUI();
     updateMainScreen();
@@ -399,6 +369,7 @@ function sellDuplicate(formatted) {
 
 function addToGarage(formatted) {
     gameState.garagePlate = formatted;
+    playClickSound();
     saveProgress();
     updateMainScreen();
     alert('Номер ' + formatted + ' установлен в гараж!');
@@ -457,6 +428,32 @@ document.getElementById('sell-all-btn').addEventListener('click', function() {
     }
 });
 
+document.getElementById('change-garage-btn').addEventListener('click', function() {
+    const keys = Object.keys(gameState.collection);
+    if (keys.length === 0) {
+        alert('Коллекция пуста! Сначала покрути рулетку.');
+        return;
+    }
+    const recentNumbers = keys.slice(-5).reverse();
+    let message = 'Выбери номер для гаража (напиши номер):\n\n';
+    recentNumbers.forEach((num, index) => {
+        message += (index + 1) + '. ' + num + '\n';
+    });
+    const choice = prompt(message + '\nВведи число от 1 до ' + recentNumbers.length);
+    if (choice && choice >= 1 && choice <= recentNumbers.length) {
+        addToGarage(recentNumbers[choice - 1]);
+    }
+});
+
+document.getElementById('clear-garage-btn').addEventListener('click', function() {
+    if (confirm('Вернуть стандартный номер А000АА77?')) {
+        gameState.garagePlate = null;
+        saveProgress();
+        updateMainScreen();
+        alert('Гараж очищен!');
+    }
+});
+
 const filterBtns = document.querySelectorAll('.filter-btn');
 for (let i = 0; i < filterBtns.length; i++) {
     filterBtns[i].addEventListener('click', function(e) {
@@ -466,38 +463,11 @@ for (let i = 0; i < filterBtns.length; i++) {
     });
 }
 
+// Инициализация аудио при первом клике
 document.addEventListener('click', function() {
     initAudio();
 }, { once: true });
 
-   // Кнопка "Сменить номер"
-   document.getElementById('change-garage-btn').addEventListener('click', function() {
-       const keys = Object.keys(gameState.collection);
-       if (keys.length === 0) {
-           alert('Коллекция пуста! Сначала покрути рулетку.');
-           return;
-       }
-       // Берём последние 5 номеров из коллекции
-       const recentNumbers = keys.slice(-5).reverse();
-       let message = 'Выбери номер для гаража (напиши номер):\n\n';
-       recentNumbers.forEach((num, index) => {
-           message += (index + 1) + '. ' + num + '\n';
-       });
-       const choice = prompt(message + '\nВведи число от 1 до ' + recentNumbers.length);
-       if (choice && choice >= 1 && choice <= recentNumbers.length) {
-           addToGarage(recentNumbers[choice - 1]);
-       }
-   });
-
-   // Кнопка "Очистить гараж"
-   document.getElementById('clear-garage-btn').addEventListener('click', function() {
-       if (confirm('Вернуть стандартный номер А000АА77?')) {
-           gameState.garagePlate = null;
-           saveProgress();
-           updateMainScreen();
-           alert('Гараж очищен!');
-       }
-   });
 loadProgress();
 updateUI();
 updateMainScreen();
