@@ -83,6 +83,14 @@ function formatNumber(n) {
     return n.letter1 + n.digits.toString().padStart(3, '0') + n.letters2 + n.region;
 }
 
+function parsePlateString(str) {
+    const letter1 = str[0];
+    const digits = str.substring(1, 4);
+    const letters2 = str.substring(4, 6);
+    const region = str.substring(6);
+    return { letter1, digits, letters2, region };
+}
+
 function createConfetti() {
     const canvas = document.getElementById('confetti-canvas');
     if (!canvas) return;
@@ -133,7 +141,7 @@ function saveProgress() {
             coins: gameState.coins,
             collection: gameState.collection,
             totalSpins: gameState.totalSpins,
-            lastNumber: gameState.lastNumber
+            lastNumber: gameState.lastNumber,
             garagePlate: gameState.garagePlate
         }));
     } catch(e) {}
@@ -159,12 +167,27 @@ const gameState = {
     totalSpins: 0,
     lastNumber: null,
     isSpinning: false,
-    garagePlate: null    
+    garagePlate: null
 };
 
 function getRarityName(r) {
     const names = { common: 'ОБЫЧНЫЙ', uncommon: 'НЕОБЫЧНЫЙ', rare: 'РЕДКИЙ', epic: 'ЭПИЧЕСКИЙ', legendary: 'ЛЕГЕНДАРНЫЙ' };
     return names[r] || r.toUpperCase();
+}
+
+function updateMainScreen() {
+    const plateStr = gameState.garagePlate || 'А000АА77';
+    const p = parsePlateString(plateStr);
+    
+    const pL1 = document.getElementById('plate-letter-1');
+    const pD1 = document.getElementById('plate-digits-1');
+    const pL2 = document.getElementById('plate-letters-2');
+    const pR = document.getElementById('plate-region');
+    
+    if (pL1) pL1.textContent = p.letter1;
+    if (pD1) pD1.textContent = p.digits;
+    if (pL2) pL2.textContent = p.letters2;
+    if (pR) pR.textContent = p.region;
 }
 
 function updateUI() {
@@ -174,6 +197,7 @@ function updateUI() {
     if (spinsEl) spinsEl.textContent = gameState.totalSpins;
     const foundEl = document.getElementById('unique-found');
     if (foundEl) foundEl.textContent = Object.keys(gameState.collection).length;
+    
     if (gameState.lastNumber) {
         const ln = document.getElementById('last-number');
         if (ln) ln.textContent = formatNumber(gameState.lastNumber);
@@ -184,6 +208,7 @@ function updateUI() {
             lr.className = 'rarity-label ' + r;
         }
     }
+    
     const spinBtn = document.getElementById('spin-btn');
     if (spinBtn) spinBtn.disabled = gameState.isSpinning || gameState.coins < GAME_CONFIG.SPIN_COST;
 }
@@ -197,20 +222,25 @@ function showScreen(id) {
 
 async function spin() {
     if (gameState.isSpinning || gameState.coins < GAME_CONFIG.SPIN_COST) return;
+    
     gameState.isSpinning = true;
     gameState.coins -= GAME_CONFIG.SPIN_COST;
     updateUI();
+    
     const targetRarity = getRandomRarity();
     const finalNumber = generateNumberByRarity(targetRarity);
     const duration = 2000;
     const startTime = Date.now();
+    
     const pL1 = document.getElementById('plate-letter-1');
     const pD1 = document.getElementById('plate-digits-1');
     const pL2 = document.getElementById('plate-letters-2');
     const pR = document.getElementById('plate-region');
     const rBadge = document.getElementById('rarity-badge');
     const rText = document.getElementById('rarity-text');
+    
     if (rBadge) rBadge.classList.add('hidden');
+    
     while (Date.now() - startTime < duration) {
         const progress = (Date.now() - startTime) / duration;
         const tempNumber = generateNumber();
@@ -221,28 +251,35 @@ async function spin() {
         playSpinSound();
         await new Promise(function(resolve) { setTimeout(resolve, 30 + progress * 100); });
     }
+    
     if (pL1) pL1.textContent = finalNumber.letter1;
     if (pD1) pD1.textContent = finalNumber.digits.toString().padStart(3, '0');
     if (pL2) pL2.textContent = finalNumber.letters2;
     if (pR) pR.textContent = finalNumber.region;
+    
     const rarity = calculateRarity(finalNumber);
     if (rText) rText.textContent = getRarityName(rarity);
     if (rBadge) {
         rBadge.className = 'rarity-badge ' + rarity;
         rBadge.classList.remove('hidden');
     }
+    
     gameState.totalSpins++;
     gameState.lastNumber = finalNumber;
     const formatted = formatNumber(finalNumber);
+    
     if (!gameState.collection[formatted]) {
         gameState.collection[formatted] = { number: finalNumber, rarity: rarity, count: 0 };
     }
     gameState.collection[formatted].count++;
     gameState.coins += GAME_CONFIG.REWARDS[rarity];
+    
     if (rarity === 'epic' || rarity === 'legendary') createConfetti();
+    
     saveProgress();
     gameState.isSpinning = false;
     updateUI();
+    
     setTimeout(function() { showResultScreen(finalNumber, rarity, GAME_CONFIG.REWARDS[rarity]); }, 1000);
 }
 
@@ -251,10 +288,12 @@ function showResultScreen(number, rarity, reward) {
     const rd1 = document.getElementById('result-digits-1');
     const rl2 = document.getElementById('result-letters-2');
     const rr = document.getElementById('result-region');
+    
     if (rl1) rl1.textContent = number.letter1;
     if (rd1) rd1.textContent = number.digits.toString().padStart(3, '0');
     if (rl2) rl2.textContent = number.letters2;
     if (rr) rr.textContent = number.region;
+    
     const rrt = document.getElementById('result-rarity-text');
     if (rrt) rrt.textContent = getRarityName(rarity);
     const rrEl = document.getElementById('result-rarity');
@@ -278,6 +317,7 @@ function showResultScreen(number, rarity, reward) {
                 gameState.coins += price;
                 saveProgress();
                 updateUI();
+                updateMainScreen();
                 sellBtn.textContent = 'Продано!';
                 sellBtn.className = 'sell-result-btn sold';
                 sellBtn.disabled = true;
@@ -322,9 +362,8 @@ function renderCollection(filter) {
         div.innerHTML = '<div class="number">' + formatted + '</div>' +
             '<div class="rarity ' + rarity + '">' + getRarityName(rarity) + '</div>' +
             '<div class="count">Найдено: ' + item.count + ' раз</div>' +
-        '<button class="sell-btn" onclick="sellDuplicate(\'' + formatted + '\')">Продать (+' + price + ' )</button>' +
-        '<button class="garage-btn" onclick="addToGarage(\'' + formatted + '\')">В гараж</button>';
-            
+            '<button class="sell-btn" onclick="sellDuplicate(\'' + formatted + '\')">Продать (+' + price + ' 🪙)</button>' +
+            '<button class="garage-btn" style="margin-top:5px; width:100%; padding:8px 12px; background:linear-gradient(135deg, #3498db, #2980b9); border:none; border-radius:8px; color:#fff; font-size:13px; font-weight:bold; cursor:pointer;" onclick="addToGarage(\'' + formatted + '\')">В гараж 🚗</button>';
         list.appendChild(div);
     }
     
@@ -339,40 +378,36 @@ function renderCollection(filter) {
 function sellDuplicate(formatted) {
     const item = gameState.collection[formatted];
     if (!item || item.count <= 0) return;
+    
     const price = SELL_PRICES[item.rarity] || 1;
     item.count--;
+    
     if (item.count <= 0) {
         delete gameState.collection[formatted];
     }
-
-function addToGarage(formatted) {
-    // 1. Сохраняем выбранный номер в память игры
-    gameState.garagePlate = formatted;
     
-    // 2. Сохраняем прогресс, чтобы при обновлении страницы номер не слетел
-    saveProgress();
-    
-    // 3. Показываем игроку красивое уведомление
-    alert('Номер ' + formatted + ' отправлен в гараж!');
-    
-    // 4. Обновляем главный экран, чтобы показать новый номер (мы допишем это чуть позже)
-    updateMainScreen();
-}
     gameState.coins += price;
     saveProgress();
     updateUI();
+    updateMainScreen();
+    
     const activeFilter = document.querySelector('.filter-btn.active');
     const filter = activeFilter ? activeFilter.dataset.rarity : 'all';
     renderCollection(filter);
 }
 
-// Функция "Продать всё"
+function addToGarage(formatted) {
+    gameState.garagePlate = formatted;
+    saveProgress();
+    updateMainScreen();
+    alert('Номер ' + formatted + ' установлен в гараж!');
+}
+
 function sellAll() {
     const keys = Object.keys(gameState.collection);
     if (keys.length === 0) return;
     
     let totalEarned = 0;
-    
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const item = gameState.collection[key];
@@ -382,11 +417,14 @@ function sellAll() {
     }
     
     gameState.coins += totalEarned;
+    gameState.garagePlate = null; // Сбрасываем гараж при полной продаже
+    
     saveProgress();
     updateUI();
+    updateMainScreen();
     renderCollection('all');
     
-    alert('Продано! Получено: ' + totalEarned + ' монет');
+    alert('Вся коллекция продана! Получено: ' + totalEarned + ' монет');
 }
 
 document.getElementById('spin-btn').addEventListener('click', spin);
@@ -406,7 +444,6 @@ document.getElementById('back-btn').addEventListener('click', function() {
     updateUI();
 });
 
-// Кнопка "Продать всё"
 document.getElementById('sell-all-btn').addEventListener('click', function() {
     const keys = Object.keys(gameState.collection);
     if (keys.length === 0) {
@@ -431,5 +468,7 @@ document.addEventListener('click', function() {
     initAudio();
 }, { once: true });
 
+// Инициализация при загрузке
 loadProgress();
 updateUI();
+updateMainScreen();
