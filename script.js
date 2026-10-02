@@ -157,6 +157,7 @@ const gameState = {
     totalSpins: 0,
     lastNumber: null,
     isSpinning: false
+    garagePlate: null    
 };
 
 function getRarityName(r) {
