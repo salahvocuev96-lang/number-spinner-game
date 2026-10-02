@@ -278,6 +278,7 @@ async function spin() {
     
     saveProgress();
     gameState.isSpinning = false;
+    updateMainScreen();
     updateUI();
     
     setTimeout(function() { showResultScreen(finalNumber, rarity, GAME_CONFIG.REWARDS[rarity]); }, 1000);
@@ -431,6 +432,7 @@ document.getElementById('spin-btn').addEventListener('click', spin);
 
 document.getElementById('close-result-btn').addEventListener('click', function() {
     showScreen('main-screen');
+    updateMainScreen();
     updateUI();
 });
 
