@@ -185,56 +185,91 @@ function showScreen(id) {
     if (target) target.classList.add('active');
 }
 
+// ===== НОВАЯ ФУНКЦИЯ SPIN С ПОЧЕРЕДНОЙ ОСТАНОВКОЙ =====
 async function spin() {
     if (gameState.isSpinning || gameState.coins < GAME_CONFIG.SPIN_COST) return;
+    
     gameState.isSpinning = true;
     gameState.coins -= GAME_CONFIG.SPIN_COST;
     updateUI();
+    
     const targetRarity = getRandomRarity();
     const finalNumber = generateNumberByRarity(targetRarity);
-    const duration = 2000;
-    const startTime = Date.now();
+    
     const pL1 = document.getElementById('plate-letter-1');
     const pD1 = document.getElementById('plate-digits-1');
     const pL2 = document.getElementById('plate-letters-2');
     const pR = document.getElementById('plate-region');
     const rBadge = document.getElementById('rarity-badge');
     const rText = document.getElementById('rarity-text');
+    
     if (rBadge) rBadge.classList.add('hidden');
-    while (Date.now() - startTime < duration) {
-        const progress = (Date.now() - startTime) / duration;
-        const tempNumber = generateNumber();
-        if (pL1) pL1.textContent = tempNumber.letter1;
-        if (pD1) pD1.textContent = tempNumber.digits.toString().padStart(3, '0');
-        if (pL2) pL2.textContent = tempNumber.letters2;
-        if (pR) pR.textContent = tempNumber.region;
-        playSpinSound();
-        await new Promise(function(resolve) { setTimeout(resolve, 30 + progress * 100); });
+    
+    // Функция анимации одного элемента
+    function animateElement(element, finalValue, duration, interval) {
+        return new Promise(function(resolve) {
+            const startTime = Date.now();
+            const timer = setInterval(function() {
+                const elapsed = Date.now() - startTime;
+                if (elapsed < duration) {
+                    // Пока время не вышло — мелькаем случайными значениями
+                    if (element === pD1) {
+                        element.textContent = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+                    } else if (element === pR) {
+                        element.textContent = GAME_CONFIG.REGIONS[Math.floor(Math.random() * GAME_CONFIG.REGIONS.length)];
+                    } else if (element === pL1) {
+                        element.textContent = GAME_CONFIG.ALLOWED_LETTERS[Math.floor(Math.random() * GAME_CONFIG.ALLOWED_LETTERS.length)];
+                    } else {
+                        const l1 = GAME_CONFIG.ALLOWED_LETTERS[Math.floor(Math.random() * GAME_CONFIG.ALLOWED_LETTERS.length)];
+                        const l2 = GAME_CONFIG.ALLOWED_LETTERS[Math.floor(Math.random() * GAME_CONFIG.ALLOWED_LETTERS.length)];
+                        element.textContent = l1 + l2;
+                    }
+                    playSpinSound();
+                } else {
+                    // Время вышло — показываем финальное значение
+                    element.textContent = finalValue;
+                    clearInterval(timer);
+                    resolve();
+                }
+            }, interval);
+        });
     }
-    if (pL1) pL1.textContent = finalNumber.letter1;
-    if (pD1) pD1.textContent = finalNumber.digits.toString().padStart(3, '0');
-    if (pL2) pL2.textContent = finalNumber.letters2;
-    if (pR) pR.textContent = finalNumber.region;
+    
+    // Запускаем все 4 элемента параллельно, но с разным временем остановки
+    await Promise.all([
+        animateElement(pL1, finalNumber.letter1, 500, 50),
+        animateElement(pD1, finalNumber.digits.toString().padStart(3, '0'), 1000, 50),
+        animateElement(pL2, finalNumber.letters2, 1500, 50),
+        animateElement(pR, finalNumber.region, 2000, 50)
+    ]);
+    
+    // Показываем редкость
     const rarity = calculateRarity(finalNumber);
     if (rText) rText.textContent = getRarityName(rarity);
     if (rBadge) {
         rBadge.className = 'rarity-badge ' + rarity;
         rBadge.classList.remove('hidden');
     }
+    
+    // Сохраняем результат
     gameState.totalSpins++;
     gameState.lastNumber = finalNumber;
     const formatted = formatNumber(finalNumber);
+    
     if (!gameState.collection[formatted]) {
         gameState.collection[formatted] = { number: finalNumber, rarity: rarity, count: 0 };
     }
     gameState.collection[formatted].count++;
     gameState.coins += GAME_CONFIG.REWARDS[rarity];
+    
     if (rarity === 'epic' || rarity === 'legendary') createConfetti();
+    
     saveProgress();
     gameState.isSpinning = false;
     updateMainScreen();
     updateUI();
-    setTimeout(function() { showResultScreen(finalNumber, rarity, GAME_CONFIG.REWARDS[rarity]); }, 1000);
+    
+    setTimeout(function() { showResultScreen(finalNumber, rarity, GAME_CONFIG.REWARDS[rarity]); }, 500);
 }
 
 function showResultScreen(number, rarity, reward) {
