@@ -74,7 +74,6 @@ body {
     margin: 40px 0;
 }
 
-/* ===== РЕАЛИСТИЧНЫЙ НОМЕРНОЙ ЗНАК ===== */
 .number-plate {
     background: #fff;
     border: 3px solid #000;
@@ -107,7 +106,7 @@ body {
     padding-right: 20px;
 }
 
-.plate-letter {
+.plate-letter, .plate-digits, .plate-letters {
     font-size: 64px;
     font-weight: 900;
     letter-spacing: 2px;
@@ -115,17 +114,7 @@ body {
 }
 
 .plate-digits {
-    font-size: 64px;
-    font-weight: 900;
     letter-spacing: 4px;
-    line-height: 1;
-}
-
-.plate-letters {
-    font-size: 50px;
-    font-weight: 900;
-    letter-spacing: 2px;
-    line-height: 1;
 }
 
 .plate-divider {
@@ -179,8 +168,7 @@ body {
 }
 
 @media (max-width: 768px) {
-    .plate-letter, .plate-digits { font-size: 48px; }
-    .plate-letters { font-size: 38px; }
+    .plate-letter, .plate-digits, .plate-letters { font-size: 48px; }
     .plate-region { font-size: 36px; }
     .plate-divider { height: 55px; margin: 0 14px; }
     .plate-inner { padding: 12px 18px; }
@@ -188,8 +176,7 @@ body {
 }
 
 @media (max-width: 480px) {
-    .plate-letter, .plate-digits { font-size: 36px; }
-    .plate-letters { font-size: 28px; }
+    .plate-letter, .plate-digits, .plate-letters { font-size: 36px; }
     .plate-region { font-size: 28px; }
     .plate-divider { height: 42px; margin: 0 10px; width: 2px; }
     .plate-inner { padding: 10px 12px; }
@@ -198,7 +185,6 @@ body {
     .flag-text { font-size: 9px; }
 }
 
-/* ===== БЕЙДЖ РЕДКОСТИ ===== */
 .rarity-badge {
     margin-top: 20px;
     padding: 10px 25px;
@@ -362,7 +348,6 @@ body {
     box-shadow: 0 10px 30px rgba(52, 152, 219, 0.5);
 }
 
-/* Кнопка "Продать" на экране результата */
 .sell-result-btn {
     padding: 15px 40px;
     background: linear-gradient(135deg, #27ae60, #2ecc71);
@@ -382,9 +367,7 @@ body {
     box-shadow: 0 10px 30px rgba(46, 204, 113, 0.5);
 }
 
-.sell-result-btn:active {
-    transform: translateY(0);
-}
+.sell-result-btn:active { transform: translateY(0); }
 
 .sell-result-btn.sold {
     background: #7f8c8d;
@@ -453,11 +436,6 @@ body {
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-.collection-item.locked {
-    opacity: 0.3;
-    filter: grayscale(1);
-}
-
 .collection-item .number {
     font-size: 24px;
     font-weight: bold;
@@ -496,10 +474,6 @@ body {
     background: linear-gradient(135deg, #2ecc71, #27ae60);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
-}
-
-.sell-btn:active {
-    transform: translateY(0);
 }
 
 .confetti-canvas {
