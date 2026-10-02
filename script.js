@@ -362,8 +362,8 @@ function renderCollection(filter) {
         div.innerHTML = '<div class="number">' + formatted + '</div>' +
             '<div class="rarity ' + rarity + '">' + getRarityName(rarity) + '</div>' +
             '<div class="count">Найдено: ' + item.count + ' раз</div>' +
-            '<button class="sell-btn" onclick="sellDuplicate(\'' + formatted + '\')">Продать (+' + price + ' 🪙)</button>' +
-            '<button class="garage-btn" style="margin-top:5px; width:100%; padding:8px 12px; background:linear-gradient(135deg, #3498db, #2980b9); border:none; border-radius:8px; color:#fff; font-size:13px; font-weight:bold; cursor:pointer;" onclick="addToGarage(\'' + formatted + '\')">В гараж 🚗</button>';
+            '<button class="sell-btn" onclick="sellDuplicate(\'' + formatted + '\')">Продать (+' + price + ' )</button>' +
+            '<button class="garage-btn" style="margin-top:5px; width:100%; padding:8px 12px; background:linear-gradient(135deg, #3498db, #2980b9); border:none; border-radius:8px; color:#fff; font-size:13px; font-weight:bold; cursor:pointer;" onclick="addToGarage(\'' + formatted + '\')">В гараж </button>';
         list.appendChild(div);
     }
     
@@ -417,7 +417,7 @@ function sellAll() {
     }
     
     gameState.coins += totalEarned;
-    gameState.garagePlate = null; // Сбрасываем гараж при полной продаже
+    gameState.garagePlate = null;
     
     saveProgress();
     updateUI();
@@ -468,7 +468,6 @@ document.addEventListener('click', function() {
     initAudio();
 }, { once: true });
 
-// Инициализация при загрузке
 loadProgress();
 updateUI();
 updateMainScreen();
