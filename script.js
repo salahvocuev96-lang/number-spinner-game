@@ -297,6 +297,8 @@ function renderCollection(filter) {
         if (countEl) countEl.textContent = '0';
         const totalEl = document.getElementById('collection-total');
         if (totalEl) totalEl.textContent = '0';
+        const sellAllBtn = document.getElementById('sell-all-btn');
+        if (sellAllBtn) sellAllBtn.disabled = true;
         return;
     }
     
@@ -317,7 +319,7 @@ function renderCollection(filter) {
         div.innerHTML = '<div class="number">' + formatted + '</div>' +
             '<div class="rarity ' + rarity + '">' + getRarityName(rarity) + '</div>' +
             '<div class="count">Найдено: ' + item.count + ' раз</div>' +
-            '<button class="sell-btn" onclick="sellDuplicate(\'' + formatted + '\')">Продать (+' + price + ' 🪙)</button>';
+            '<button class="sell-btn" onclick="sellDuplicate(\'' + formatted + '\')">Продать (+' + price + ' )</button>';
         list.appendChild(div);
     }
     
@@ -325,6 +327,8 @@ function renderCollection(filter) {
     if (countEl) countEl.textContent = foundCount;
     const totalEl = document.getElementById('collection-total');
     if (totalEl) totalEl.textContent = collectionKeys.length;
+    const sellAllBtn = document.getElementById('sell-all-btn');
+    if (sellAllBtn) sellAllBtn.disabled = false;
 }
 
 function sellDuplicate(formatted) {
@@ -343,6 +347,29 @@ function sellDuplicate(formatted) {
     renderCollection(filter);
 }
 
+// Функция "Продать всё"
+function sellAll() {
+    const keys = Object.keys(gameState.collection);
+    if (keys.length === 0) return;
+    
+    let totalEarned = 0;
+    
+    for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const item = gameState.collection[key];
+        const price = SELL_PRICES[item.rarity] || 1;
+        totalEarned += price * item.count;
+        delete gameState.collection[key];
+    }
+    
+    gameState.coins += totalEarned;
+    saveProgress();
+    updateUI();
+    renderCollection('all');
+    
+    alert('Продано! Получено: ' + totalEarned + ' монет');
+}
+
 document.getElementById('spin-btn').addEventListener('click', spin);
 
 document.getElementById('close-result-btn').addEventListener('click', function() {
@@ -358,6 +385,18 @@ document.getElementById('collection-btn').addEventListener('click', function() {
 document.getElementById('back-btn').addEventListener('click', function() {
     showScreen('main-screen');
     updateUI();
+});
+
+// Кнопка "Продать всё"
+document.getElementById('sell-all-btn').addEventListener('click', function() {
+    const keys = Object.keys(gameState.collection);
+    if (keys.length === 0) {
+        alert('Коллекция пуста!');
+        return;
+    }
+    if (confirm('Продать ВСЕ номера из коллекции?')) {
+        sellAll();
+    }
 });
 
 const filterBtns = document.querySelectorAll('.filter-btn');
