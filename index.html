@@ -8,11 +8,10 @@
 </head>
 <body>
 
-    <!-- Главный экран -->
     <div id="main-screen" class="screen active">
         <div class="header">
             <div class="coins">
-                <span class="coin-icon">🪙</span>
+                <span class="coin-icon"></span>
                 <span id="coin-count">1000</span>
             </div>
             <button id="collection-btn" class="icon-btn">📚</button>
@@ -41,7 +40,7 @@
             </div>
         </div>
 
-        <div class="last-result" id="last-result">
+        <div class="last-result">
             <span class="label">Последний:</span>
             <span id="last-number">—</span>
             <span id="last-rarity" class="rarity-label">—</span>
@@ -64,11 +63,10 @@
         </div>
     </div>
 
-    <!-- Экран результата -->
     <div id="result-screen" class="screen">
         <div class="result-content">
-            <h2 id="result-title">ВЫПАЛО!</h2>
-            <div id="result-plate" class="number-plate large">
+            <h2>ВЫПАЛО!</h2>
+            <div class="number-plate large">
                 <div class="plate-inner">
                     <div class="plate-left">
                         <span id="result-letter-1" class="plate-letter">А</span>
@@ -88,15 +86,14 @@
             <div id="result-rarity" class="rarity-badge">
                 <span id="result-rarity-text">ОБЫЧНЫЙ</span>
             </div>
-<div id="result-reward" class="reward">
-    +<span id="reward-amount">10</span> 🪙
-</div>
-<button id="sell-result-btn" class="sell-result-btn">Продать номер</button>
-<button id="close-result-btn" class="btn-primary">Продолжить</button>
+            <div class="reward">
+                +<span id="reward-amount">10</span> 🪙
+            </div>
+            <button id="sell-result-btn" class="sell-result-btn">Продать номер</button>
+            <button id="close-result-btn" class="btn-primary">Продолжить</button>
         </div>
     </div>
 
-    <!-- Экран коллекции -->
     <div id="collection-screen" class="screen">
         <div class="collection-header">
             <button id="back-btn" class="icon-btn">←</button>
