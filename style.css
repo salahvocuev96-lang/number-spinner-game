@@ -525,3 +525,31 @@ body {
     margin-bottom: 10px;
     opacity: 0.8;
 }
+
+   .garage-controls {
+       display: flex;
+       justify-content: center;
+       gap: 10px;
+       margin-bottom: 15px;
+   }
+
+   .garage-btn-small {
+       padding: 6px 14px;
+       background: rgba(255, 255, 255, 0.1);
+       border: 1px solid rgba(255, 255, 255, 0.3);
+       border-radius: 8px;
+       color: #fff;
+       font-size: 12px;
+       cursor: pointer;
+       transition: all 0.3s;
+   }
+
+   .garage-btn-small:hover {
+       background: rgba(255, 255, 255, 0.2);
+       transform: scale(1.05);
+   }
+
+   #clear-garage-btn:hover {
+       background: rgba(231, 76, 60, 0.3);
+       border-color: #e74c3c;
+   }
