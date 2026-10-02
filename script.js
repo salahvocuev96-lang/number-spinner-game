@@ -470,6 +470,34 @@ document.addEventListener('click', function() {
     initAudio();
 }, { once: true });
 
+   // Кнопка "Сменить номер"
+   document.getElementById('change-garage-btn').addEventListener('click', function() {
+       const keys = Object.keys(gameState.collection);
+       if (keys.length === 0) {
+           alert('Коллекция пуста! Сначала покрути рулетку.');
+           return;
+       }
+       // Берём последние 5 номеров из коллекции
+       const recentNumbers = keys.slice(-5).reverse();
+       let message = 'Выбери номер для гаража (напиши номер):\n\n';
+       recentNumbers.forEach((num, index) => {
+           message += (index + 1) + '. ' + num + '\n';
+       });
+       const choice = prompt(message + '\nВведи число от 1 до ' + recentNumbers.length);
+       if (choice && choice >= 1 && choice <= recentNumbers.length) {
+           addToGarage(recentNumbers[choice - 1]);
+       }
+   });
+
+   // Кнопка "Очистить гараж"
+   document.getElementById('clear-garage-btn').addEventListener('click', function() {
+       if (confirm('Вернуть стандартный номер А000АА77?')) {
+           gameState.garagePlate = null;
+           saveProgress();
+           updateMainScreen();
+           alert('Гараж очищен!');
+       }
+   });
 loadProgress();
 updateUI();
 updateMainScreen();
