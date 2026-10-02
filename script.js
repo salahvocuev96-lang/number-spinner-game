@@ -20,9 +20,7 @@ function initAudio() {
             audioCtx = new Ctx();
             audioEnabled = true;
         }
-    } catch(e) {
-        audioEnabled = false;
-    }
+    } catch(e) { audioEnabled = false; }
 }
 
 function playSpinSound() {
@@ -265,8 +263,7 @@ function showResultScreen(number, rarity, reward) {
     if (sellBtn) {
         const formatted = formatNumber(number);
         const price = SELL_PRICES[rarity] || 1;
-        const count = gameState.collection[formatted] ? gameState.collection[formatted].count : 0;
-        sellBtn.textContent = 'Продать (+' + price + ' 🪙)';
+        sellBtn.textContent = 'Продать (+' + price + ' )';
         sellBtn.className = 'sell-result-btn';
         sellBtn.disabled = false;
         sellBtn.onclick = function() {
