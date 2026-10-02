@@ -517,3 +517,11 @@ body {
     pointer-events: none;
     z-index: 1000;
 }
+
+.garage-label {
+    text-align: center;
+    font-size: 14px;
+    color: #ffd700;
+    margin-bottom: 10px;
+    opacity: 0.8;
+}
