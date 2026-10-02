@@ -147,12 +147,10 @@ function getRarityName(r) {
 function updateMainScreen() {
     const plateStr = gameState.garagePlate || 'А000АА77';
     const p = parsePlateString(plateStr);
-    
     const pL1 = document.getElementById('plate-letter-1');
     const pD1 = document.getElementById('plate-digits-1');
     const pL2 = document.getElementById('plate-letters-2');
     const pR = document.getElementById('plate-region');
-    
     if (pL1) pL1.textContent = p.letter1;
     if (pD1) pD1.textContent = p.digits;
     if (pL2) pL2.textContent = p.letters2;
@@ -166,7 +164,6 @@ function updateUI() {
     if (spinsEl) spinsEl.textContent = gameState.totalSpins;
     const foundEl = document.getElementById('unique-found');
     if (foundEl) foundEl.textContent = Object.keys(gameState.collection).length;
-    
     if (gameState.lastNumber) {
         const ln = document.getElementById('last-number');
         if (ln) ln.textContent = formatNumber(gameState.lastNumber);
@@ -177,7 +174,6 @@ function updateUI() {
             lr.className = 'rarity-label ' + r;
         }
     }
-    
     const spinBtn = document.getElementById('spin-btn');
     if (spinBtn) spinBtn.disabled = gameState.isSpinning || gameState.coins < GAME_CONFIG.SPIN_COST;
 }
@@ -191,25 +187,20 @@ function showScreen(id) {
 
 async function spin() {
     if (gameState.isSpinning || gameState.coins < GAME_CONFIG.SPIN_COST) return;
-    
     gameState.isSpinning = true;
     gameState.coins -= GAME_CONFIG.SPIN_COST;
     updateUI();
-    
     const targetRarity = getRandomRarity();
     const finalNumber = generateNumberByRarity(targetRarity);
     const duration = 2000;
     const startTime = Date.now();
-    
     const pL1 = document.getElementById('plate-letter-1');
     const pD1 = document.getElementById('plate-digits-1');
     const pL2 = document.getElementById('plate-letters-2');
     const pR = document.getElementById('plate-region');
     const rBadge = document.getElementById('rarity-badge');
     const rText = document.getElementById('rarity-text');
-    
     if (rBadge) rBadge.classList.add('hidden');
-    
     while (Date.now() - startTime < duration) {
         const progress = (Date.now() - startTime) / duration;
         const tempNumber = generateNumber();
@@ -220,36 +211,29 @@ async function spin() {
         playSpinSound();
         await new Promise(function(resolve) { setTimeout(resolve, 30 + progress * 100); });
     }
-    
     if (pL1) pL1.textContent = finalNumber.letter1;
     if (pD1) pD1.textContent = finalNumber.digits.toString().padStart(3, '0');
     if (pL2) pL2.textContent = finalNumber.letters2;
     if (pR) pR.textContent = finalNumber.region;
-    
     const rarity = calculateRarity(finalNumber);
     if (rText) rText.textContent = getRarityName(rarity);
     if (rBadge) {
         rBadge.className = 'rarity-badge ' + rarity;
         rBadge.classList.remove('hidden');
     }
-    
     gameState.totalSpins++;
     gameState.lastNumber = finalNumber;
     const formatted = formatNumber(finalNumber);
-    
     if (!gameState.collection[formatted]) {
         gameState.collection[formatted] = { number: finalNumber, rarity: rarity, count: 0 };
     }
     gameState.collection[formatted].count++;
     gameState.coins += GAME_CONFIG.REWARDS[rarity];
-    
     if (rarity === 'epic' || rarity === 'legendary') createConfetti();
-    
     saveProgress();
     gameState.isSpinning = false;
     updateMainScreen();
     updateUI();
-    
     setTimeout(function() { showResultScreen(finalNumber, rarity, GAME_CONFIG.REWARDS[rarity]); }, 1000);
 }
 
@@ -258,19 +242,16 @@ function showResultScreen(number, rarity, reward) {
     const rd1 = document.getElementById('result-digits-1');
     const rl2 = document.getElementById('result-letters-2');
     const rr = document.getElementById('result-region');
-    
     if (rl1) rl1.textContent = number.letter1;
     if (rd1) rd1.textContent = number.digits.toString().padStart(3, '0');
     if (rl2) rl2.textContent = number.letters2;
     if (rr) rr.textContent = number.region;
-    
     const rrt = document.getElementById('result-rarity-text');
     if (rrt) rrt.textContent = getRarityName(rarity);
     const rrEl = document.getElementById('result-rarity');
     if (rrEl) rrEl.className = 'rarity-badge ' + rarity;
     const ra = document.getElementById('reward-amount');
     if (ra) ra.textContent = reward;
-    
     const sellBtn = document.getElementById('sell-result-btn');
     if (sellBtn) {
         const formatted = formatNumber(number);
@@ -294,7 +275,6 @@ function showResultScreen(number, rarity, reward) {
             }
         };
     }
-    
     showScreen('result-screen');
 }
 
@@ -303,7 +283,6 @@ function renderCollection(filter) {
     if (!list) return;
     list.innerHTML = '';
     const collectionKeys = Object.keys(gameState.collection);
-    
     if (collectionKeys.length === 0) {
         list.innerHTML = '<div style="text-align: center; padding: 40px; opacity: 0.5;">Коллекция пуста. Крути рулетку!</div>';
         const countEl = document.getElementById('collection-count');
@@ -314,29 +293,23 @@ function renderCollection(filter) {
         if (sellAllBtn) sellAllBtn.disabled = true;
         return;
     }
-    
     let foundCount = 0;
-    
     for (let i = 0; i < collectionKeys.length; i++) {
         const formatted = collectionKeys[i];
         const item = gameState.collection[formatted];
         const rarity = item.rarity;
-        
         if (filter && filter !== 'all' && rarity !== filter) continue;
-        
         foundCount++;
         const price = SELL_PRICES[rarity] || 1;
-        
         const div = document.createElement('div');
         div.className = 'collection-item';
         div.innerHTML = '<div class="number">' + formatted + '</div>' +
             '<div class="rarity ' + rarity + '">' + getRarityName(rarity) + '</div>' +
             '<div class="count">Найдено: ' + item.count + ' раз</div>' +
-            '<button class="sell-btn" onclick="sellDuplicate(\'' + formatted + '\')">Продать (+' + price + ' 🪙)</button>' +
-            '<button class="garage-btn" style="margin-top:5px; width:100%; padding:8px 12px; background:linear-gradient(135deg, #3498db, #2980b9); border:none; border-radius:8px; color:#fff; font-size:13px; font-weight:bold; cursor:pointer;" onclick="addToGarage(\'' + formatted + '\')">В гараж 🚗</button>';
+            '<button class="sell-btn" onclick="sellDuplicate(\'' + formatted + '\')">Продать (+' + price + ' )</button>' +
+            '<button class="garage-btn" style="margin-top:5px; width:100%; padding:8px 12px; background:linear-gradient(135deg, #3498db, #2980b9); border:none; border-radius:8px; color:#fff; font-size:13px; font-weight:bold; cursor:pointer;" onclick="addToGarage(\'' + formatted + '\')">В гараж </button>';
         list.appendChild(div);
     }
-    
     const countEl = document.getElementById('collection-count');
     if (countEl) countEl.textContent = foundCount;
     const totalEl = document.getElementById('collection-total');
@@ -348,20 +321,16 @@ function renderCollection(filter) {
 function sellDuplicate(formatted) {
     const item = gameState.collection[formatted];
     if (!item || item.count <= 0) return;
-    
     const price = SELL_PRICES[item.rarity] || 1;
     item.count--;
-    
     if (item.count <= 0) {
         delete gameState.collection[formatted];
     }
-    
     gameState.coins += price;
     playSellSound();
     saveProgress();
     updateUI();
     updateMainScreen();
-    
     const activeFilter = document.querySelector('.filter-btn.active');
     const filter = activeFilter ? activeFilter.dataset.rarity : 'all';
     renderCollection(filter);
@@ -378,7 +347,6 @@ function addToGarage(formatted) {
 function sellAll() {
     const keys = Object.keys(gameState.collection);
     if (keys.length === 0) return;
-    
     let totalEarned = 0;
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
@@ -387,36 +355,29 @@ function sellAll() {
         totalEarned += price * item.count;
         delete gameState.collection[key];
     }
-    
     gameState.coins += totalEarned;
     gameState.garagePlate = null;
-    
     saveProgress();
     updateUI();
     updateMainScreen();
     renderCollection('all');
-    
     alert('Вся коллекция продана! Получено: ' + totalEarned + ' монет');
 }
 
 document.getElementById('spin-btn').addEventListener('click', spin);
-
 document.getElementById('close-result-btn').addEventListener('click', function() {
     showScreen('main-screen');
     updateMainScreen();
     updateUI();
 });
-
 document.getElementById('collection-btn').addEventListener('click', function() {
     renderCollection('all');
     showScreen('collection-screen');
 });
-
 document.getElementById('back-btn').addEventListener('click', function() {
     showScreen('main-screen');
     updateUI();
 });
-
 document.getElementById('sell-all-btn').addEventListener('click', function() {
     const keys = Object.keys(gameState.collection);
     if (keys.length === 0) {
@@ -427,7 +388,6 @@ document.getElementById('sell-all-btn').addEventListener('click', function() {
         sellAll();
     }
 });
-
 document.getElementById('change-garage-btn').addEventListener('click', function() {
     const keys = Object.keys(gameState.collection);
     if (keys.length === 0) {
@@ -435,7 +395,7 @@ document.getElementById('change-garage-btn').addEventListener('click', function(
         return;
     }
     const recentNumbers = keys.slice(-5).reverse();
-    let message = 'Выбери номер для гаража (напиши номер):\n\n';
+    let message = 'Выбери номер для гаража:\n\n';
     recentNumbers.forEach((num, index) => {
         message += (index + 1) + '. ' + num + '\n';
     });
@@ -444,7 +404,6 @@ document.getElementById('change-garage-btn').addEventListener('click', function(
         addToGarage(recentNumbers[choice - 1]);
     }
 });
-
 document.getElementById('clear-garage-btn').addEventListener('click', function() {
     if (confirm('Вернуть стандартный номер А000АА77?')) {
         gameState.garagePlate = null;
@@ -453,7 +412,6 @@ document.getElementById('clear-garage-btn').addEventListener('click', function()
         alert('Гараж очищен!');
     }
 });
-
 const filterBtns = document.querySelectorAll('.filter-btn');
 for (let i = 0; i < filterBtns.length; i++) {
     filterBtns[i].addEventListener('click', function(e) {
@@ -462,12 +420,9 @@ for (let i = 0; i < filterBtns.length; i++) {
         renderCollection(e.target.dataset.rarity);
     });
 }
-
-// Инициализация аудио при первом клике
 document.addEventListener('click', function() {
     initAudio();
 }, { once: true });
-
 loadProgress();
 updateUI();
 updateMainScreen();
