@@ -134,6 +134,7 @@ function saveProgress() {
             collection: gameState.collection,
             totalSpins: gameState.totalSpins,
             lastNumber: gameState.lastNumber
+            garagePlate: gameState.garagePlate
         }));
     } catch(e) {}
 }
@@ -147,6 +148,7 @@ function loadProgress() {
             gameState.collection = d.collection || {};
             gameState.totalSpins = d.totalSpins || 0;
             gameState.lastNumber = d.lastNumber || null;
+            gameState.garagePlate = d.garagePlate || null;
         }
     } catch(e) {}
 }
@@ -156,7 +158,7 @@ const gameState = {
     collection: {},
     totalSpins: 0,
     lastNumber: null,
-    isSpinning: false
+    isSpinning: false,
     garagePlate: null    
 };
 
@@ -320,7 +322,9 @@ function renderCollection(filter) {
         div.innerHTML = '<div class="number">' + formatted + '</div>' +
             '<div class="rarity ' + rarity + '">' + getRarityName(rarity) + '</div>' +
             '<div class="count">Найдено: ' + item.count + ' раз</div>' +
-            '<button class="sell-btn" onclick="sellDuplicate(\'' + formatted + '\')">Продать (+' + price + ' )</button>';
+        '<button class="sell-btn" onclick="sellDuplicate(\'' + formatted + '\')">Продать (+' + price + ' )</button>' +
+        '<button class="garage-btn" onclick="addToGarage(\'' + formatted + '\')">В гараж</button>';
+            
         list.appendChild(div);
     }
     
@@ -340,6 +344,20 @@ function sellDuplicate(formatted) {
     if (item.count <= 0) {
         delete gameState.collection[formatted];
     }
+
+function addToGarage(formatted) {
+    // 1. Сохраняем выбранный номер в память игры
+    gameState.garagePlate = formatted;
+    
+    // 2. Сохраняем прогресс, чтобы при обновлении страницы номер не слетел
+    saveProgress();
+    
+    // 3. Показываем игроку красивое уведомление
+    alert('Номер ' + formatted + ' отправлен в гараж!');
+    
+    // 4. Обновляем главный экран, чтобы показать новый номер (мы допишем это чуть позже)
+    updateMainScreen();
+}
     gameState.coins += price;
     saveProgress();
     updateUI();
